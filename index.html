@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quotation Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="menu">
+        <div class="menu-header">
+            <img src="images/Cclogo-centrotherm.svg" class="menu-logo">
+        </div>
+
+        <div class="menu-item active" onclick="showPage('dashboard', this)">🏠 Overall Dashboard</div>
+        <div class="menu-item" onclick="showPage('quotation', this)">📝 Quotation Entry</div>
+        <div class="menu-item" onclick="showPage('POGermanyEntry', this)">📄 PO Germany Entry</div>
+        <div class="menu-item" onclick="showPage('POCustomerEntry', this)">📄 PO Customer Entry</div>
+    
+
+
+    
+
+        <div class="menu-item">📊 Quotation Database</div>
+        <div class="menu-item">📚 German Database</div>
+        <div class="menu-item">📚 Customer Database</div>
+        <div class="menu-item">📈 GLP</div>
+        <div class="menu-item" onclick="showPage('quotationTemplate', this)">📝 Quotation Entry Template</div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="content">
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="page active">
+            <div class="dashboard-container">
+                <img src="images/c-logo.png" class="dashboard-logo">
+            </div>
+        </div>
+
+        <!-- QUOTATION ENTRY -->
+        <!-- QUOTATION ENTRY -->
+<div id="quotation" class="page">
+    <div class="quotation-wrapper">
+
+        <div class="quotation-column">
+            <div class="quotation-box">
+                <h1 class="title">Quotation Data Entry Form</h1>
+                <div class="form-card">
+
+                    <div class="form-row">
+                        <label>Quotation Date</label>
+                        <input type="date" id="qDate">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Quotation No</label>
+                        <input type="text" id="qNo">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Customer</label>
+                        <select id="qCustomer">
+                        <option value="">Select Customer</option>
+                        <option>TP Solar</option>
+                        <option>EMMVEE</option>
+                        <option>Premier</option>
+                        <option>Websol</option>
+                        <option>Renew</option>
+                        <option>Tata Bangalore</option>
+                        <option>Jupiter</option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-row">
+                        <label>Status</label>
+                        <select id="qStatus">
+                        <option value="">Select Status</option>
+                        <option>Open</option>
+                        <option>Closed</option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-row">
+                        <label>Value</label>
+                        <input type="number" id="qValue">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Quotation Attachment (PDF)</label>
+                        <input type="file" id="qPdf" accept="application/pdf">
+
+                    </div>
+
+                    <div class="button-row">
+                        <button class="btn" type="button" onclick="clearQuotation()">Clear</button>
+
+                        <button class="btn primary" onclick="submitQuotation()">Submit</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="quotation-column">
+            <div class="quotation-box">
+                <h1 class="title">Quotation Search Form</h1>
+                <div class="form-card">
+                    <div class="form-row">
+                        <label>Quotation No</label>
+                        <input type="text">
+                    </div>
+                    <div class="form-row">
+                        <label>Customer</label>
+                        <input type="text">
+                    </div>
+                    <div class="button-row">
+                        <button class="btn">Clear</button>
+                        <button class="btn">Modify</button>
+                        <button class="btn">Save</button>
+                        <button class="btn primary">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+        <!-- PO GERMANY ENTRY -->
+        <div id="POGermanyEntry" class="page">
+            <div class="quotation-wrapper">
+
+                <div class="quotation-column">
+                    <div class="quotation-box">
+                        <h1 class="title">PO Germany Data Entry Form</h1>
+                        <div class="form-card">
+                            <div class="form-row"><label>PO Date</label><input type="date"></div>
+                            <div class="form-row"><label>PO No</label><input type="text"></div>
+                            <div class="form-row"><label>Customer</label><input type="text"></div>
+                            <div class="form-row"><label>Status</label><input type="text"></div>
+                            <div class="form-row"><label>Value</label><input type="number"></div>
+                            <div class="form-row"><label>PO Attachment (PDF)</label><input type="file"></div>
+                            <div class="button-row">
+                                <button class="btn">Clear</button>
+                                <button class="btn primary">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quotation-column">
+                    <div class="quotation-box">
+                        <h1 class="title">German PO Search Form</h1>
+                        <div class="form-card">
+                            <div class="form-row"><label>German PO No</label><input type="text"></div>
+                            <div class="form-row"><label>Customer</label><input type="text"></div>
+                            <div class="button-row">
+                                <button class="btn">Clear</button>
+                                <button class="btn primary">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- PO CUSTOMER ENTRY -->
+         <div id="POCustomerEntry" class="page">
+             <div class="quotation-wrapper">
+
+        <!-- LEFT: DATA ENTRY -->
+                 <div class="quotation-column">
+                     <div class="quotation-box">
+                             <h1 class="title">PO Customer Data Entry Form</h1>
+                              <div class="form-card">
+                    <div class="form-row"><label>PO Date</label><input type="date"></div>
+                    <div class="form-row"><label>Quotation No</label><input type="text"></div>
+                    <div class="form-row"><label>PO No</label><input type="text"></div>
+                    <div class="form-row"><label>Customer</label><input type="text"></div>
+                    <div class="form-row"><label>Status</label><input type="text"></div>
+                    <div class="form-row"><label>Value</label><input type="number"></div>
+                    <div class="form-row"><label>PO Attachment (PDF)</label><input type="file"></div>
+                    <div class="button-row">
+                        <button class="btn">Clear</button>
+                        <button class="btn primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: SEARCH -->
+        <div class="quotation-column">
+            <div class="quotation-box">
+                <h1 class="title">Customer PO Search Form</h1>
+                <div class="form-card">
+                    <div class="form-row"><label>Customer PO No</label><input type="text"></div>
+                    <div class="form-row"><label>Customer</label><input type="text"></div>
+                    <div class="button-row">
+                        <button class="btn">Clear</button>
+                        <button class="btn primary">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+         </div>
+
+
+    <!-- QUOTATION ENTRY TEMPLATE -->
+<div id="quotationTemplate" class="page">
+
+    <div class="quotation-box" style="max-width:1200px; margin:auto;">
+
+        <h2 class="title">Centotherm India Private Limited</h2>
+
+        <!-- COMPANY + INVOICE DETAILS -->
+        <table width="100%" border="1" cellspacing="0" cellpadding="6">
+            <tr>
+                <td width="60%" rowspan="4">
+                    <strong>Centotherm India Private Limited</strong><br>
+                    (Formerly known as Centotherm Photovoltaics India Private Limited)<br>
+                    No. 03, 2nd Floor, AVS Compound,<br>
+                    BTM 1st Stage, Bangalore<br><br>
+
+                    GSTIN/UIN: <input><br>
+                    State Name: <input>
+                </td>
+                <td>
+                    Invoice No:<br>
+                    <input>
+                </td>
+                <td>
+                    Dated:<br>
+                    <input type="date">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Mode/Terms of Payment:<br>
+                    <input value="100% Within 60 days">
+                </td>
+                <td>
+                    Reference No & Date:<br>
+                    <input>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Buyer’s Order No:<br>
+                    <input>
+                </td>
+                <td>
+                    Dated:<br>
+                    <input type="date">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Dispatch Doc No:<br>
+                    <input>
+                </td>
+                <td>
+                    Destination:<br>
+                    <input value="Tirunelveli">
+                </td>
+            </tr>
+        </table>
+
+        <br>
+
+        <!-- BUYER / CONSIGNEE -->
+        <table width="100%" border="1" cellspacing="0" cellpadding="6">
+            <tr>
+                <td width="50%">
+                    <strong>Buyer (Bill To)</strong><br>
+                    <textarea rows="5" style="width:100%"></textarea>
+                </td>
+                <td width="50%">
+                    <strong>Consignee (Ship To)</strong><br>
+                    <textarea rows="5" style="width:100%"></textarea>
+                </td>
+            </tr>
+        </table>
+
+        <br>
+
+        <!-- ITEM TABLE -->
+        <table width="100%" border="1" cellspacing="0" cellpadding="6">
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Description of Goods</th>
+                    <th>HSN/SAC</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>Per</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody id="invoiceItems">
+                <tr>
+                    <td>1</td>
+                    <td><input></td>
+                    <td><input></td>
+                    <td><input type="number"></td>
+                    <td><input type="number"></td>
+                    <td><input></td>
+                    <td><input type="number"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button class="btn" onclick="addInvoiceRow()">+ Add Row</button>
+
+        <br><br>
+
+        <!-- TOTAL -->
+        <table width="100%" border="1" cellspacing="0" cellpadding="6">
+            <tr>
+                <td align="right"><strong>Total</strong></td>
+                <td width="200"><input type="number"></td>
+            </tr>
+        </table>
+
+        <br>
+
+        <!-- AMOUNT IN WORDS -->
+        <strong>Amount Chargeable (in words):</strong><br>
+        <input style="width:100%" value="Indian Rupees One Lakh Ten Thousand Nine Hundred Twenty-Five and Ninety paise Only">
+
+        <br><br>
+
+        <!-- TAX -->
+        <strong>Tax Amount (in words):</strong><br>
+        <input style="width:100%" value="Indian Rupees Sixteen Thousand Nine Hundred Twenty and Ninety paise Only">
+
+        <br><br>
+
+        <!-- FOOTER -->
+        <table width="100%">
+            <tr>
+                <td>
+                    Company's PAN: <input value="AAECC1428K">
+                </td>
+                <td align="right">
+                    For Centotherm India Private Limited<br><br><br>
+                    Authorized Signatory
+                </td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+html, body {
+    height: 100%;
+}
+
+/* LAYOUT */
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+/* SIDEBAR */
+.menu {
+    width: 260px;
+    background: #d9d9d9;
+    border-right: 2px solid #c00000;
+}
+
+.menu-header {
+    height: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #b30000;
+}
+
+.menu-logo {
+    width: 70%;
+}
+
+.menu-item {
+    padding: 14px 18px;
+    cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item.active {
+    background: #ff0000;
+    color: white;
+}
+
+/* CONTENT */
+.content {
+    flex: 1;
+    background: rgb(255, 224, 224);
+    padding: 30px;
+}
+
+/* PAGE SWITCHING */
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+/* DASHBOARD */
+.dashboard-container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* FORMS */
+.quotation-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 80px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+.quotation-column {
+    display: flex;
+    justify-content: center;
+}
+
+.quotation-box {
+    border: 2px solid #c00000;
+    border-radius: 20px;
+    padding: 35px;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-card {
+    width: 420px;
+    background: #ff1a1a;
+    padding: 20px;
+    border-radius: 25px;
+}
+
+/* Increase label size and spacing */
+.form-row {
+    display: flex;
+    align-items: center;          /* 🔥 vertical center */
+    margin-bottom: 18px;
+}
+
+
+.form-row label {
+    width: 45%;
+    font-size: 16px;
+     font-weight: bold;     /* ✅ makes text bold */  
+    line-height: 36px;  /* 🔥 SAME AS INPUT HEIGHT */
+           
+}
+
+
+.form-row input:focus {
+    font-weight: bold;
+}
+
+.form-row input {
+    width: 50%;
+    height: 36px;
+    font-size: 15px;
+    padding: 6px 8px;
+    line-height: 36px;    /* 🔥 MATCH HEIGHT */
+    color: #111;        
+}
+
+
+.form-row input[type="file"] {
+    height: auto;
+    line-height: normal;
+    font-weight: normal;
+}
+
+.button-row {
+    text-align: center;
+}
+
+.btn {
+    padding: 8px 16px;
+    margin: 5px;
+}
+
+.btn.primary {
+    font-weight: bold;
+}
+
+.form-row label,
+.form-row input {
+    vertical-align: middle;
+}
+
+/* Make input & select look identical */
+.form-row input,
+.form-row select {
+    width: 50%;
+    height: 36px;
+    font-size: 15px;
+    padding: 0 8px;              /* 🔥 fixes vertical alignment */
+    line-height: 36px;           /* 🔥 centers text vertically */
+    color: #111;
+    border: none;                /* ❌ remove black border */
+    outline: none;               /* ❌ remove focus border */
+    box-sizing: border-box;
+}
+
+/* Remove browser default dropdown styling */
+.form-row select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.6);
+}
+
