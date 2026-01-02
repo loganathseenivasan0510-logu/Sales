@@ -1,3 +1,5 @@
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxQqAlHZy2LvVhR-0HsS-Hhy9SUNldxGFJ1RaAwan5mZ8MR_gAiEiaaIHBSbnDCdGZC/exec";
+
 function showPage(pageId, element) {
 
     // Hide all pages
@@ -153,5 +155,59 @@ function renamePdf(file, qNo) {
         lastModified: Date.now()
     });
 }
+
+// ---------------- SEARCH QUOTATION ----------------
+
+function searchQuotation() {
+    const qNo = document.getElementById("searchQNo").value.trim();
+    const customer = document.getElementById("searchCustomer").value.trim();
+
+    if (!qNo && !customer) {
+        alert("Fill the Quotation No or Customer name");
+        return;
+    }
+
+    fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "search",
+            qNo,
+            customer
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success || data.results.length === 0) {
+            alert("No data found !!");
+            return;
+        }
+        renderSearchResults(data.results);
+    })
+    .catch(() => alert("Error fetching data"));
+}
+
+function renderSearchResults(rows) {
+    const area = document.getElementById("searchResultArea");
+    const tbody = document.getElementById("resultTableBody");
+
+    tbody.innerHTML = "";
+    area.style.display = "block";
+
+    rows.forEach(r => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${r.qDate}</td>
+            <td>${r.qNo}</td>
+            <td>${r.customer}</td>
+            <td>${r.status}</td>
+            <td>${r.value}</td>
+            <td>${r.pdf || "No PDF"}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
 
 
