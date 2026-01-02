@@ -94,7 +94,7 @@ async function submitQuotation() {
             pdfName: file ? file.name : ""
         };
 
-        fetch("https://script.google.com/macros/s/AKfycbzYbBI28S22jbG0py03-R442K5BKfs0zSSSHscWzWezAB-fAF7kGsSnGj5ZenY1nONy/exec", {
+        fetch("https://script.google.com/macros/s/AKfycbwVfJZkBifEKIzSSlaZsvY4oIQsTpLVFMQju8M-HqS3im4lu_-2fb5Asib4EyQjT6DM/exec", {
             method: "POST",
             body: JSON.stringify(data)
         })
@@ -153,3 +153,4 @@ function renamePdf(file, qNo) {
         lastModified: Date.now()
     });
 }
+
