@@ -73,8 +73,13 @@
             <select id="qCustomer">
               <option value="">Select Customer</option>
               <option>TP Solar</option>
+              <option>EMMVEE</option>
               <option>Premier</option>
               <option>Renew</option>
+              <option>Websol</option>
+              <option>Tata Bangalore</option>
+              <option>Jupiter</option> 
+                
             </select>
           </div>
 
@@ -107,52 +112,73 @@
     </div>
 
     <!-- RIGHT: SEARCH FORM -->
-    <div class="quotation-column">
-      <div class="quotation-box">
-        <h1 class="title">Quotation Search Form</h1>
-        <div class="form-card">
+<div class="quotation-column">
+  <div class="quotation-box">
+    <h1 class="title">Quotation Search Form</h1>
+    <div class="form-card">
 
-          <div class="form-row">
-            <label>Quotation No</label>
-            <input type="text" id="searchQNo">
-          </div>
-
-          <div class="form-row">
-            <label>Customer</label>
-            <input type="text" id="searchCustomer">
-          </div>
-
-          <div class="button-row">
-            <button class="btn primary" onclick="searchQuotation()">Search</button>
-
-          </div>
-
-        </div>
+      <!-- Quotation No with Auto-suggest -->
+      <div class="form-row">
+        <label>Quotation No</label>
+        <input
+          type="text"
+          id="searchQNo"
+          list="qNoList"
+          placeholder="Enter Quotation No">
+        <datalist id="qNoList"></datalist>
       </div>
+
+      <!-- Customer Dropdown -->
+      <div class="form-row">
+        <label>Customer</label>
+        <select id="searchCustomer">
+          <option value="">Select Customer</option>
+          <option>TP Solar</option>
+          <option>EMMVEE</option>
+          <option>Premier</option>
+          <option>Renew</option>
+          <option>Websol</option>
+          <option>Tata Bangalore</option>
+          <option>Jupiter</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="button-row">
+        <button class="btn" onclick="clearSearch()">Clear</button>
+        <button class="btn primary" onclick="searchQuotation()">Search</button>
+        <button class="btn" disabled>Save</button>
+        <button class="btn" disabled>Modify</button>
+      </div>
+
     </div>
+  </div>
+</div>
+
 
   </div>
 
-  <!-- ✅ SEARCH RESULT AREA -->
-  <div id="searchResultArea" style="display:none; margin-top:30px;">
-    <div style="background:#fff; padding:20px; border-radius:10px;">
-      <h3>Search Results</h3>
+ <!-- SEARCH RESULT AREA -->
+<div id="searchResultArea" style="display:none; margin-top:30px;">
+  <div style="background:#fff; padding:20px; border-radius:10px;">
+    <h3>Search Results</h3>
 
-      <table border="1" width="100%" cellpadding="8">
-        <thead>
-          <tr>
-            <th>Quotation Date</th>
-            <th>Quotation No</th>
-            <th>Customer</th>
-            <th>Status</th>
-            <th>Value</th>
-            <th>PDF</th>
-          </tr>
-        </thead>
-        <tbody id="resultTableBody"></tbody>
-      </table>
-    </div>
+    <table border="1" width="100%" cellpadding="8">
+      <thead>
+        <tr>
+          <th>Quotation Date</th>
+          <th>Quotation No</th>
+          <th>Customer</th>
+          <th>Status</th>
+          <th>Value</th>
+          <th>PDF</th>
+        </tr>
+      </thead>
+      <tbody id="resultTableBody"></tbody>
+    </table>
   </div>
+</div>
+
 
 </div>
 
@@ -396,6 +422,7 @@
 
 </body>
 </html>
+
 
 
 
