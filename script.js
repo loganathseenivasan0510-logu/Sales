@@ -209,5 +209,49 @@ function renderSearchResults(rows) {
     });
 }
 
+// Clear Search Button Logic
+
+function clearSearch() {
+    document.getElementById("searchQNo").value = "";
+    document.getElementById("searchCustomer").value = "";
+    document.getElementById("searchResultArea").style.display = "none";
+}
+
+
+//Auto-suggest Quotation No Q-type dropdown
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const qNoInput = document.getElementById("searchQNo");
+    if (!qNoInput) return;
+
+    qNoInput.addEventListener("input", function () {
+        const value = this.value.trim();
+        if (!value) return;
+
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "suggestQNo",
+                prefix: value
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById("qNoList");
+            list.innerHTML = "";
+
+            if (!data.results) return;
+
+            data.results.forEach(q => {
+                const option = document.createElement("option");
+                option.value = q;
+                list.appendChild(option);
+            });
+        })
+        .catch(() => console.log("Suggestion error"));
+    });
+
+});
 
 
