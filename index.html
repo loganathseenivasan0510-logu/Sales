@@ -258,154 +258,81 @@
          </div>
 
 
-    <!-- QUOTATION ENTRY TEMPLATE -->
-<div id="quotationTemplate" class="page">
+<!-- CT INDIA STOCKS -->
+<div id="CTIndiaStocks" class="page">
+  <div class="quotation-wrapper">
 
-    <div class="quotation-box" style="max-width:1200px; margin:auto;">
+    <!-- LEFT: STOCK ENTRY FORM -->
+    <div class="quotation-column">
+      <div class="quotation-box">
+        <h1 class="title">Stock Entry Form</h1>
+        <div class="form-card">
 
-        <h2 class="title">Centotherm India Private Limited</h2>
+          <div class="form-row">
+            <label>Stock Update Date</label>
+            <input type="date" id="stockDate">
+          </div>
 
-        <!-- COMPANY + INVOICE DETAILS -->
-        <table width="100%" border="1" cellspacing="0" cellpadding="6">
-            <tr>
-                <td width="60%" rowspan="4">
-                    <strong>Centotherm India Private Limited</strong><br>
-                    (Formerly known as Centotherm Photovoltaics India Private Limited)<br>
-                    No. 03, 2nd Floor, AVS Compound,<br>
-                    BTM 1st Stage, Bangalore<br><br>
+          <div class="form-row">
+            <label>Part ID</label>
+            <input type="text" id="stockPartId">
+          </div>
 
-                    GSTIN/UIN: <input><br>
-                    State Name: <input>
-                </td>
-                <td>
-                    Invoice No:<br>
-                    <input>
-                </td>
-                <td>
-                    Dated:<br>
-                    <input type="date">
-                </td>
-            </tr>
+          <div class="form-row">
+            <label>Part Description</label>
+            <input type="text" id="stockDescription">
+          </div>
 
-            <tr>
-                <td>
-                    Mode/Terms of Payment:<br>
-                    <input value="100% Within 60 days">
-                </td>
-                <td>
-                    Reference No & Date:<br>
-                    <input>
-                </td>
-            </tr>
+          <div class="form-row">
+            <label>Quantity</label>
+            <input type="number" id="stockQty">
+          </div>
 
-            <tr>
-                <td>
-                    Buyer’s Order No:<br>
-                    <input>
-                </td>
-                <td>
-                    Dated:<br>
-                    <input type="date">
-                </td>
-            </tr>
+          <div class="form-row">
+            <label>Image Upload</label>
+            <input type="file" id="stockImage" accept="image/*">
+          </div>
 
-            <tr>
-                <td>
-                    Dispatch Doc No:<br>
-                    <input>
-                </td>
-                <td>
-                    Destination:<br>
-                    <input value="Tirunelveli">
-                </td>
-            </tr>
-        </table>
+          <div class="button-row">
+            <button class="btn" onclick="clearStock()">Clear</button>
+            <button class="btn primary" onclick="submitStock()">Submit</button>
+          </div>
 
-        <br>
-
-        <!-- BUYER / CONSIGNEE -->
-        <table width="100%" border="1" cellspacing="0" cellpadding="6">
-            <tr>
-                <td width="50%">
-                    <strong>Buyer (Bill To)</strong><br>
-                    <textarea rows="5" style="width:100%"></textarea>
-                </td>
-                <td width="50%">
-                    <strong>Consignee (Ship To)</strong><br>
-                    <textarea rows="5" style="width:100%"></textarea>
-                </td>
-            </tr>
-        </table>
-
-        <br>
-
-        <!-- ITEM TABLE -->
-        <table width="100%" border="1" cellspacing="0" cellpadding="6">
-            <thead>
-                <tr>
-                    <th>S.No</th>
-                    <th>Description of Goods</th>
-                    <th>HSN/SAC</th>
-                    <th>Qty</th>
-                    <th>Rate</th>
-                    <th>Per</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody id="invoiceItems">
-                <tr>
-                    <td>1</td>
-                    <td><input></td>
-                    <td><input></td>
-                    <td><input type="number"></td>
-                    <td><input type="number"></td>
-                    <td><input></td>
-                    <td><input type="number"></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <button class="btn" onclick="addInvoiceRow()">+ Add Row</button>
-
-        <br><br>
-
-        <!-- TOTAL -->
-        <table width="100%" border="1" cellspacing="0" cellpadding="6">
-            <tr>
-                <td align="right"><strong>Total</strong></td>
-                <td width="200"><input type="number"></td>
-            </tr>
-        </table>
-
-        <br>
-
-        <!-- AMOUNT IN WORDS -->
-        <strong>Amount Chargeable (in words):</strong><br>
-        <input style="width:100%" value="Indian Rupees One Lakh Ten Thousand Nine Hundred Twenty-Five and Ninety paise Only">
-
-        <br><br>
-
-        <!-- TAX -->
-        <strong>Tax Amount (in words):</strong><br>
-        <input style="width:100%" value="Indian Rupees Sixteen Thousand Nine Hundred Twenty and Ninety paise Only">
-
-        <br><br>
-
-        <!-- FOOTER -->
-        <table width="100%">
-            <tr>
-                <td>
-                    Company's PAN: <input value="AAECC1428K">
-                </td>
-                <td align="right">
-                    For Centotherm India Private Limited<br><br><br>
-                    Authorized Signatory
-                </td>
-            </tr>
-        </table>
-
+        </div>
+      </div>
     </div>
+
+      
+    <!-- RIGHT: STOCK AVAILABILITY -->
+    <div class="quotation-column">
+      <div class="quotation-box">
+        <h1 class="title">Stock Availability</h1>
+        <div class="form-card">
+
+          <div class="form-row">
+            <label>Part ID</label>
+            <input type="text" id="searchPartId">
+          </div>
+
+          <div class="form-row">
+            <label>Part Description</label>
+            <input type="text" id="searchPartDesc">
+          </div>
+
+          <div class="button-row">
+            <button class="btn" onclick="clearStockSearch()">Clear</button>
+            <button class="btn primary" onclick="searchStock()">Search</button>
+            <button class="btn" disabled>Save</button>
+            <button class="btn" disabled>Modify</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
+
 
 
 
@@ -414,6 +341,7 @@
 
 </body>
 </html>
+
 
 
 
