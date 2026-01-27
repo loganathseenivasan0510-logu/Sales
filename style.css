@@ -171,24 +171,6 @@ html, body {
     box-sizing: border-box;
 }
 
-/* Remove browser default dropdown styling */
-.form-row select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: #fff;
-    cursor: pointer;
-}
 
-.form-row input:focus,
-.form-row select:focus {
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.6);
-}
 
-/* Stack right-side stock boxes vertically */
-.stock-right {
-    display: flex;
-    flex-direction: column;
-    gap: 30px; /* spacing between boxes */
-}
 
