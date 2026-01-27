@@ -303,3 +303,70 @@ function clearStockSearch() {
 }
 
 
+function fetchAvailableStock() {
+    const partId = document.getElementById("updPartId").value.trim();
+    if (!partId) return;
+
+    fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "getStock",
+            partId: partId
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            alert("Part ID not found");
+            document.getElementById("updAvailableQty").value = "";
+            return;
+        }
+        document.getElementById("updAvailableQty").value = data.quantity;
+    })
+    .catch(() => alert("Error fetching stock"));
+}
+function clearUpdateStock() {
+    document.getElementById("updPartId").value = "";
+    document.getElementById("updAvailableQty").value = "";
+    document.getElementById("updQty").value = "";
+    document.getElementById("updCustomer").value = "";
+}
+function submitUpdateStock() {
+    const partId = document.getElementById("updPartId").value.trim();
+    const availableQty = Number(document.getElementById("updAvailableQty").value);
+    const updateQty = Number(document.getElementById("updQty").value);
+    const customer = document.getElementById("updCustomer").value.trim();
+
+    if (!partId || !updateQty || !customer) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    if (updateQty > availableQty) {
+        alert("Update quantity cannot exceed available stock");
+        return;
+    }
+
+    fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "updateStock",
+            partId: partId,
+            issuedQty: updateQty,
+            customer: customer
+        })
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.success) {
+            alert("Stock updated successfully");
+            clearUpdateStock();
+        } else {
+            alert("Error: " + result.message);
+        }
+    })
+    .catch(() => alert("Error updating stock"));
+}
+
+
+
