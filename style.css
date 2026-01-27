@@ -185,3 +185,10 @@ html, body {
     box-shadow: 0 0 0 2px rgba(255,255,255,0.6);
 }
 
+/* Stack right-side stock boxes vertically */
+.stock-right {
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* spacing between boxes */
+}
+
