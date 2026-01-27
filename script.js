@@ -255,3 +255,51 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+// -------- CT INDIA STOCKS --------
+
+function clearStock() {
+    document.querySelectorAll(
+        "#CTIndiaStocks input"
+    ).forEach(el => el.value = "");
+}
+
+function submitStock() {
+    if (!stockFieldsFilled()) {
+        alert("Please fill all stock fields");
+        return;
+    }
+
+    alert("Stock submitted successfully");
+    clearStock();
+
+    // Later: connect to Google Apps Script (same as quotation)
+}
+
+function stockFieldsFilled() {
+    const fields = [
+        "stockDate",
+        "stockPartId",
+        "stockDescription",
+        "stockQty"
+    ];
+    return fields.every(id => document.getElementById(id).value.trim() !== "");
+}
+
+function searchStock() {
+    const partId = document.getElementById("searchPartId").value.trim();
+    const desc = document.getElementById("searchPartDesc").value.trim();
+
+    if (!partId && !desc) {
+        alert("Enter Part ID or Description");
+        return;
+    }
+
+    alert("Stock search triggered");
+}
+
+function clearStockSearch() {
+    document.getElementById("searchPartId").value = "";
+    document.getElementById("searchPartDesc").value = "";
+}
+
+
