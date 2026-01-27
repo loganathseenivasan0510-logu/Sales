@@ -290,7 +290,7 @@
 
           <div class="form-row">
             <label>Image Upload</label>
-            <input type="file" id="stockImage" accept="image/*">
+            <input type="file" id="stockImage">
           </div>
 
           <div class="button-row">
@@ -302,9 +302,10 @@
       </div>
     </div>
 
-      
-    <!-- RIGHT: STOCK AVAILABILITY -->
-    <div class="quotation-column">
+    <!-- RIGHT SIDE (STACKED) -->
+    <div class="quotation-column stock-right">
+
+      <!-- STOCK AVAILABILITY -->
       <div class="quotation-box">
         <h1 class="title">Stock Availability</h1>
         <div class="form-card">
@@ -328,47 +329,44 @@
 
         </div>
       </div>
-    </div>
 
-   <!-- UPDATE STOCK LIST -->
-<div class="quotation-column">
-  <div class="quotation-box">
-    <h1 class="title">Update Stock List</h1>
-    <div class="form-card">
+      <!-- UPDATE STOCK LIST -->
+      <div class="quotation-box">
+        <h1 class="title">Update Stock List</h1>
+        <div class="form-card">
 
-      <div class="form-row">
-        <label>Part ID</label>
-        <input type="text" id="updPartId" onblur="fetchAvailableStock()">
-      </div>
+          <div class="form-row">
+            <label>Part ID</label>
+            <input type="text" id="updPartId">
+          </div>
 
-      <div class="form-row">
-        <label>Available Quantity</label>
-        <input type="number" id="updAvailableQty" readonly>
-      </div>
+          <div class="form-row">
+            <label>Available Quantity</label>
+            <input type="number" id="updAvailableQty" readonly>
+          </div>
 
-      <div class="form-row">
-        <label>Update Quantity</label>
-        <input type="number" id="updQty">
-      </div>
+          <div class="form-row">
+            <label>Update Quantity</label>
+            <input type="number" id="updQty">
+          </div>
 
-      <div class="form-row">
-        <label>Customer</label>
-        <input type="text" id="updCustomer">
-      </div>
+          <div class="form-row">
+            <label>Customer</label>
+            <input type="text" id="updCustomer">
+          </div>
 
-      <div class="button-row">
-        <button class="btn" onclick="clearUpdateStock()">Clear</button>
-        <button class="btn primary" onclick="submitUpdateStock()">Submit</button>
+          <div class="button-row">
+            <button class="btn" onclick="clearUpdateStock()">Clear</button>
+            <button class="btn primary" onclick="submitUpdateStock()">Submit</button>
+          </div>
+
+        </div>
       </div>
 
     </div>
   </div>
 </div>
 
-
-      
-  </div>
-</div>
 
 
 
@@ -378,6 +376,7 @@
 
 </body>
 </html>
+
 
 
 
