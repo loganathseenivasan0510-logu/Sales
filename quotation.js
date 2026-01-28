@@ -59,6 +59,7 @@ window.submitQuotation = async function () {
       status: document.getElementById("qStatus").value,
       value: Number(document.getElementById("qValue").value),
       pdfUrl: driveData.pdfUrl,
+      sortKey: `${quotationDate}_${qNo}`,
       createdAt: serverTimestamp()
     });
 
