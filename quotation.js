@@ -14,7 +14,7 @@ const WEB_APP_URL =
   "https://script.google.com/macros/s/AKfycbxQqAlHZy2LvVhR-0HsS-Hhy9SUNldxGFJ1RaAwan5mZ8MR_gAiEiaaIHBSbnDCdGZC/exec";
 
 /* ================= SUBMIT QUOTATION ================= */
-window.submitQuotation = async function () {
+window.submitQuotation = async function submitQuotation() {
 
   const qNo = document.getElementById("qNo").value.trim();
   if (!qNo) {
@@ -36,7 +36,7 @@ window.submitQuotation = async function () {
     const base64 = reader.result.split(",")[1];
 
     // 🔹 1. Upload PDF to Google Drive
-    const driveRes = await fetch(https://script.google.com/macros/s/AKfycbxQqAlHZy2LvVhR-0HsS-Hhy9SUNldxGFJ1RaAwan5mZ8MR_gAiEiaaIHBSbnDCdGZC/exec, {
+    const driveRes = await fetch("https://script.google.com/macros/s/AKfycbxQqAlHZy2LvVhR-0HsS-Hhy9SUNldxGFJ1RaAwan5mZ8MR_gAiEiaaIHBSbnDCdGZC/exec", {
       method: "POST",
       body: JSON.stringify({
         pdfBase64: base64,
@@ -51,6 +51,16 @@ window.submitQuotation = async function () {
       return;
     }
 
+
+/* ================= BUTTON BINDING ================= */
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("submitQuotationBtn")
+    .addEventListener("click", submitQuotation);
+});
+
+    
+
     // 🔹 2. Save data to Firestore
     await setDoc(doc(db, "quotations", qNo), {
       quotationNo: qNo,
@@ -58,8 +68,7 @@ window.submitQuotation = async function () {
       customer: document.getElementById("qCustomer").value,
       status: document.getElementById("qStatus").value,
       value: Number(document.getElementById("qValue").value),
-      pdfUrl: driveData.pdfUrl,
-      sortKey: `${quotationDate}_${qNo}`,
+      pdfUrl: driveData.pdfUrl,  
       createdAt: serverTimestamp()
     });
 
@@ -128,11 +137,7 @@ window.clearSearch = function () {
   document.getElementById("searchResultArea").style.display = "none";
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  document
-    .getElementById("submitQuotationBtn")
-    .addEventListener("click", submitQuotation);
-});
+
 
 
 
