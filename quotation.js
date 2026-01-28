@@ -1,4 +1,4 @@
-import { db } from "./firebase.js";
+import { db, storage } from "./firebase.js";
 import {
   doc,
   setDoc,
@@ -10,6 +10,12 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
 /* ================= SAVE QUOTATION ================= */
 window.submitQuotation = async function () {
 
@@ -19,19 +25,33 @@ window.submitQuotation = async function () {
     return;
   }
 
+  const fileInput = document.getElementById("qPdf");
+  let pdfUrl = "";
+
+  // ---------- PDF UPLOAD ----------
+  if (fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    const pdfRef = ref(storage, `quotations/${qNo}.pdf`);
+
+    await uploadBytes(pdfRef, file);
+    pdfUrl = await getDownloadURL(pdfRef);
+  }
+
+  // ---------- SAVE FIRESTORE ----------
   await setDoc(doc(db, "quotations", qNo), {
     quotationNo: qNo,
     quotationDate: document.getElementById("qDate").value,
     customer: document.getElementById("qCustomer").value,
     status: document.getElementById("qStatus").value,
     value: Number(document.getElementById("qValue").value),
+    pdfUrl: pdfUrl,
     createdAt: serverTimestamp()
   });
 
-  alert("Quotation saved successfully");
+  alert("Quotation saved with PDF");
 };
 
-/* ================= SEARCH QUOTATION ================= */
+/* ================= SEARCH ================= */
 window.searchQuotation = async function () {
 
   const qNo = document.getElementById("searchQNo").value.trim();
@@ -41,32 +61,31 @@ window.searchQuotation = async function () {
   tableBody.innerHTML = "";
   document.getElementById("searchResultArea").style.display = "block";
 
-  // Search by Quotation No
   if (qNo) {
-    const ref = doc(db, "quotations", qNo);
-    const snap = await getDoc(ref);
-
+    const snap = await getDoc(doc(db, "quotations", qNo));
     if (!snap.exists()) {
       alert("Quotation not found");
       return;
     }
-
     addRow(snap.data());
     return;
   }
 
-  // Search by Customer
-  let q = query(collection(db, "quotations"));
+  let q = collection(db, "quotations");
   if (customer) {
-    q = query(collection(db, "quotations"), where("customer", "==", customer));
+    q = query(q, where("customer", "==", customer));
   }
 
   const snap = await getDocs(q);
-  snap.forEach(doc => addRow(doc.data()));
+  snap.forEach(d => addRow(d.data()));
 };
 
-/* ================= ADD RESULT ROW ================= */
+/* ================= RESULT ROW ================= */
 function addRow(data) {
+  const pdfLink = data.pdfUrl
+    ? `<a href="${data.pdfUrl}" target="_blank">View</a>`
+    : "-";
+
   const row = `
     <tr>
       <td>${data.quotationDate || ""}</td>
@@ -74,10 +93,12 @@ function addRow(data) {
       <td>${data.customer || ""}</td>
       <td>${data.status || ""}</td>
       <td>${data.value || ""}</td>
-      <td>-</td>
+      <td>${pdfLink}</td>
     </tr>
   `;
-  document.getElementById("resultTableBody").insertAdjacentHTML("beforeend", row);
+
+  document.getElementById("resultTableBody")
+    .insertAdjacentHTML("beforeend", row);
 }
 
 /* ================= CLEAR ================= */
@@ -85,6 +106,7 @@ window.clearQuotation = function () {
   ["qDate", "qNo", "qCustomer", "qStatus", "qValue"].forEach(id => {
     document.getElementById(id).value = "";
   });
+  document.getElementById("qPdf").value = "";
 };
 
 window.clearSearch = function () {
