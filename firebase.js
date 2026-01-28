@@ -1,12 +1,7 @@
-// Import Firebase App Module
-import { initializeApp } from
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Import Firestore Module
-import { getFirestore } from
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-// 🔥 Paste your Firebase Config here
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDBIzNoDGZjTpey9IFezHC1fPcbSG28cPk",
   authDomain: "quotationdashboard1.firebaseapp.com",
