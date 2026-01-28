@@ -36,7 +36,7 @@ window.submitQuotation = async function () {
     const base64 = reader.result.split(",")[1];
 
     // 🔹 1. Upload PDF to Google Drive
-    const driveRes = await fetch(WEB_APP_URL, {
+    const driveRes = await fetch(https://script.google.com/macros/s/AKfycbxQqAlHZy2LvVhR-0HsS-Hhy9SUNldxGFJ1RaAwan5mZ8MR_gAiEiaaIHBSbnDCdGZC/exec, {
       method: "POST",
       body: JSON.stringify({
         pdfBase64: base64,
