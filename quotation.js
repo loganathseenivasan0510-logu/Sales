@@ -48,7 +48,16 @@ async function submitQuotation() {
         })
       });
 
-      const driveData = await driveRes.json();
+      const text = await driveRes.text();
+console.log("RAW RESPONSE:", text);
+
+let driveData;
+try {
+  driveData = JSON.parse(text);
+} catch (e) {
+  alert("Server did not return JSON. Check Apps Script.");
+  return;
+}
       if (!driveData.success) {
         alert("PDF upload failed");
         return;
