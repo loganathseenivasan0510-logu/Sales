@@ -1,3 +1,4 @@
+console.log("quotation.js loaded");
 import { db } from "./firebase.js";
 import {
   doc,
@@ -16,7 +17,7 @@ const WEB_APP_URL =
 /* ================= SUBMIT QUOTATION ================= */
 window.submitQuotation = async function submitQuotation() {
 
-    console.log("Submit clicked"); // 👈 ADD HERE
+  console.log("Submit clicked");
 
   const qNo = document.getElementById("qNo").value.trim();
   if (!qNo) {
@@ -54,12 +55,6 @@ window.submitQuotation = async function submitQuotation() {
     }
 
 
-/* ================= BUTTON BINDING ================= */
-document.addEventListener("DOMContentLoaded", () => {
-  document
-    .getElementById("submitQuotationBtn")
-    .addEventListener("click", submitQuotation);
-});
 
     
 
@@ -140,6 +135,19 @@ window.clearSearch = function () {
 };
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM loaded");
+
+  const btn = document.getElementById("submitQuotationBtn");
+
+  if (!btn) {
+    console.error("Submit button NOT found");
+    return;
+  }
+
+  btn.addEventListener("click", submitQuotation);
+  console.log("Submit button bound");
+});
 
 
 
