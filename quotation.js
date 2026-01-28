@@ -1,25 +1,10 @@
 import { db } from "./firebase.js";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  getDocs,
-  query,
-  where,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-console.log("quotation.js loaded");
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxQqAlHZy2LvVhR-0HsS-Hhy9SUNldxGFJ1RaAwan5mZ8MR_gAiEiaaIHBSbnDCdGZC/exec";
 
-const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbxQqAlHZy2LvVhR-0HsS-Hhy9SUNldxGFJ1RaAwan5mZ8MR_gAiEiaaIHBSbnDCdGZC/exec";
-
-/* ================= SUBMIT QUOTATION ================= */
+// Submit quotation
 async function submitQuotation() {
-
-  console.log("Submit clicked");
-
   const qNo = document.getElementById("qNo").value.trim();
   if (!qNo) {
     alert("Quotation No required");
@@ -39,31 +24,26 @@ async function submitQuotation() {
     try {
       const base64 = reader.result.split(",")[1];
 
-      // 1️⃣ Upload PDF
+      // Upload PDF
       const driveRes = await fetch(WEB_APP_URL, {
         method: "POST",
-        body: JSON.stringify({
-          pdfBase64: base64,
-          pdfName: qNo + ".pdf"
-        })
+        body: JSON.stringify({ pdfBase64: base64, pdfName: qNo + ".pdf" })
       });
 
       const text = await driveRes.text();
-console.log("RAW RESPONSE:", text);
-
-let driveData;
-try {
-  driveData = JSON.parse(text);
-} catch (e) {
-  alert("Server did not return JSON. Check Apps Script.");
-  return;
-}
+      let driveData;
+      try {
+        driveData = JSON.parse(text);
+      } catch (e) {
+        alert("Server did not return JSON. Check Apps Script.");
+        return;
+      }
       if (!driveData.success) {
         alert("PDF upload failed");
         return;
       }
 
-      // 2️⃣ Save to Firestore
+      // Save to Firestore
       await setDoc(doc(db, "quotations", qNo), {
         quotationNo: qNo,
         quotationDate: document.getElementById("qDate").value,
@@ -78,31 +58,69 @@ try {
       clearQuotation();
 
     } catch (err) {
-      console.error(err);
       alert("Error occurred. Check console.");
+      console.error(err);
     }
   };
 
   reader.readAsDataURL(file);
 }
 
-/* ================= CLEAR ================= */
+// Clear form
 function clearQuotation() {
-  ["qDate","qNo","qCustomer","qStatus","qValue"]
-    .forEach(id => document.getElementById(id).value = "");
+  ["qDate", "qNo", "qCustomer", "qStatus", "qValue"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("qPdf").value = "";
 }
 
-/* ================= BUTTON BINDING ================= */
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM loaded");
+// Search logic
+function searchQuotation() {
+  const qNo = document.getElementById("searchQNo").value.trim();
+  const customer = document.getElementById("searchCustomer").value.trim();
 
-  const btn = document.getElementById("submitQuotationBtn");
-  if (!btn) {
-    console.error("Submit button not found");
+  if (!qNo && !customer) {
+    alert("Fill the Quotation No or Customer name");
     return;
   }
 
-  btn.addEventListener("click", submitQuotation);
-  console.log("Submit button bound");
-});
+  fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "search", qNo, customer })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success || data.results.length === 0) {
+        alert("No data found !!");
+        return;
+      }
+      renderSearchResults(data.results);
+    })
+    .catch(() => alert("Error fetching data"));
+}
+
+function renderSearchResults(rows) {
+  const area = document.getElementById("searchResultArea");
+  const tbody = document.getElementById("resultTableBody");
+
+  tbody.innerHTML = "";
+  area.style.display = "block";
+
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.qDate}</td>
+      <td>${r.qNo}</td>
+      <td>${r.customer}</td>
+      <td>${r.status}</td>
+      <td>${r.value}</td>
+      <td>${r.pdf || "No PDF"}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Clear search form
+function clearSearch() {
+  document.getElementById("searchQNo").value = "";
+  document.getElementById("searchCustomer").value = "";
+  document.getElementById("searchResultArea").style.display = "none";
+}
