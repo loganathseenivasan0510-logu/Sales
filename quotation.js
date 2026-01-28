@@ -127,3 +127,32 @@ window.clearSearch = function () {
   document.getElementById("searchCustomer").value = "";
   document.getElementById("searchResultArea").style.display = "none";
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("submitQuotationBtn")
+    .addEventListener("click", submitQuotation);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
