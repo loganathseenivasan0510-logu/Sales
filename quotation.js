@@ -16,6 +16,8 @@ const WEB_APP_URL =
 /* ================= SUBMIT QUOTATION ================= */
 window.submitQuotation = async function submitQuotation() {
 
+    console.log("Submit clicked"); // 👈 ADD HERE
+
   const qNo = document.getElementById("qNo").value.trim();
   if (!qNo) {
     alert("Quotation No required");
