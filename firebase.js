@@ -5,8 +5,7 @@ import { initializeApp } from
 // Import Firestore Module
 import { getFirestore } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage } from 
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
 // 🔥 Paste your Firebase Config here
 const firebaseConfig = {
   apiKey: "AIzaSyDBIzNoDGZjTpey9IFezHC1fPcbSG28cPk",
@@ -22,4 +21,3 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore Database
 export const db = getFirestore(app);
-export const storage = getStorage(app);
