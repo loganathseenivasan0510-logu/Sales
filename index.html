@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Quotation Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
     <script type="module" src="firebase.js"></script>
     <script type="module" src="quotation.js"></script>
     <link rel="icon" type="image/png" href="c-logo.png">
@@ -15,7 +16,6 @@
             <div class="menu-header">
                 <img src="./Cclogo-centrotherm.svg" class="menu-logo">
             </div>
-
             <div class="menu-item active" onclick="showPage('dashboard', this)">🏠 Overall Dashboard</div>
             <div class="menu-item" onclick="showPage('quotation', this)">📝 Quotation Entry</div>
             <div class="menu-item" onclick="showPage('POGermanyEntry', this)">📄 PO Germany Entry</div>
@@ -25,7 +25,14 @@
 
         <!-- MAIN CONTENT -->
         <div class="content">
-            <!-- QUOTATION ENTRY PAGE -->
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="page active">
+                <div class="dashboard-container">
+                    <img src="./c-logo.png" class="dashboard-logo">
+                </div>
+            </div>
+
+            <!-- QUOTATION ENTRY -->
             <div id="quotation" class="page">
                 <div class="quotation-wrapper">
                     <!-- LEFT: DATA ENTRY -->
@@ -104,6 +111,8 @@
                                 <div class="button-row">
                                     <button class="btn" onclick="clearSearch()">Clear</button>
                                     <button class="btn primary" onclick="searchQuotation()">Search</button>
+                                    <button class="btn" disabled>Save</button>
+                                    <button class="btn" disabled>Modify</button>
                                 </div>
                             </div>
                         </div>
@@ -130,17 +139,145 @@
                     </div>
                 </div>
             </div>
+
+            <!-- PO GERMANY ENTRY -->
+            <div id="POGermanyEntry" class="page">
+                <div class="quotation-wrapper">
+                    <div class="quotation-column">
+                        <div class="quotation-box">
+                            <h1 class="title">PO Germany Data Entry Form</h1>
+                            <div class="form-card">
+                                <div class="form-row"><label>PO Date</label><input type="date"></div>
+                                <div class="form-row"><label>PO No</label><input type="text"></div>
+                                <div class="form-row"><label>Customer</label><input type="text"></div>
+                                <div class="form-row"><label>Status</label><input type="text"></div>
+                                <div class="form-row"><label>Value</label><input type="number"></div>
+                                <div class="form-row"><label>PO Attachment (PDF)</label><input type="file"></div>
+                                <div class="button-row">
+                                    <button class="btn">Clear</button>
+                                    <button class="btn primary">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quotation-column">
+                        <div class="quotation-box">
+                            <h1 class="title">German PO Search Form</h1>
+                            <div class="form-card">
+                                <div class="form-row"><label>German PO No</label><input type="text"></div>
+                                <div class="form-row"><label>Customer</label><input type="text"></div>
+                                <div class="button-row">
+                                    <button class="btn">Clear</button>
+                                    <button class="btn primary">Search</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PO CUSTOMER ENTRY -->
+            <div id="POCustomerEntry" class="page">
+                <div class="quotation-wrapper">
+                    <!-- LEFT: DATA ENTRY -->
+                    <div class="quotation-column">
+                        <div class="quotation-box">
+                            <h1 class="title">PO Customer Data Entry Form</h1>
+                            <div class="form-card">
+                                <div class="form-row"><label>PO Date</label><input type="date"></div>
+                                <div class="form-row"><label>Quotation No</label><input type="text"></div>
+                                <div class="form-row"><label>PO No</label><input type="text"></div>
+                                <div class="form-row"><label>Customer</label><input type="text"></div>
+                                <div class="form-row"><label>Status</label><input type="text"></div>
+                                <div class="form-row"><label>Value</label><input type="number"></div>
+                                <div class="form-row"><label>PO Attachment (PDF)</label><input type="file"></div>
+                                <div class="button-row">
+                                    <button class="btn">Clear</button>
+                                    <button class="btn primary">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: SEARCH -->
+                    <div class="quotation-column">
+                        <div class="quotation-box">
+                            <h1 class="title">Customer PO Search Form</h1>
+                            <div class="form-card">
+                                <div class="form-row"><label>Customer PO No</label><input type="text"></div>
+                                <div class="form-row"><label>Customer</label><input type="text"></div>
+                                <div class="button-row">
+                                    <button class="btn">Clear</button>
+                                    <button class="btn primary">Search</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CT INDIA STOCKS -->
+            <div id="CTIndiaStocks" class="page">
+                <div class="quotation-wrapper">
+                    <!-- LEFT: STOCK ENTRY FORM -->
+                    <div class="quotation-column">
+                        <div class="quotation-box">
+                            <h1 class="title">Stock Entry Form</h1>
+                            <div class="form-card">
+                                <div class="form-row">
+                                    <label>Stock Update Date</label>
+                                    <input type="date" id="stockDate">
+                                </div>
+                                <div class="form-row">
+                                    <label>Part ID</label>
+                                    <input type="text" id="stockPartId">
+                                </div>
+                                <div class="form-row">
+                                    <label>Part Description</label>
+                                    <input type="text" id="stockDescription">
+                                </div>
+                                <div class="form-row">
+                                    <label>Quantity</label>
+                                    <input type="number" id="stockQty">
+                                </div>
+                                <div class="form-row">
+                                    <label>Image Upload</label>
+                                    <input type="file" id="stockImage" accept="image/*">
+                                </div>
+                                <div class="button-row">
+                                    <button class="btn" onclick="clearStock()">Clear</button>
+                                    <button class="btn primary" onclick="submitStock()">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: STOCK AVAILABILITY -->
+                    <div class="quotation-column">
+                        <div class="quotation-box">
+                            <h1 class="title">Stock Availability</h1>
+                            <div class="form-card">
+                                <div class="form-row">
+                                    <label>Part ID</label>
+                                    <input type="text" id="searchPartId">
+                                </div>
+                                <div class="form-row">
+                                    <label>Part Description</label>
+                                    <input type="text" id="searchPartDesc">
+                                </div>
+                                <div class="button-row">
+                                    <button class="btn" onclick="clearStockSearch()">Clear</button>
+                                    <button class="btn primary" onclick="searchStock()">Search</button>
+                                    <button class="btn" disabled>Save</button>
+                                    <button class="btn" disabled>Modify</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-
-    <script>
-        // This will load the script.js at runtime
-        document.addEventListener("DOMContentLoaded", function() {
-            const btn = document.getElementById("submitQuotationBtn");
-            if (btn) {
-                btn.addEventListener("click", submitQuotation);
-            }
-        });
-    </script>
 </body>
 </html>
