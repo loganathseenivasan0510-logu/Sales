@@ -1,50 +1,94 @@
 import { db } from "./firebase.js";
-
 import {
   doc,
-  setDoc
+  setDoc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ================= SAVE QUOTATION ================= */
 window.submitQuotation = async function () {
 
-  let quotationNo =
-    document.getElementById("quotationNo").value;
+  const qNo = document.getElementById("qNo").value.trim();
+  if (!qNo) {
+    alert("Quotation No is required");
+    return;
+  }
 
-  await setDoc(doc(db, "quotations", quotationNo), {
-
-    customer: document.getElementById("customer").value,
-    status: document.getElementById("status").value,
-    value: Number(document.getElementById("value").value),
-
-    timestamp: new Date()
+  await setDoc(doc(db, "quotations", qNo), {
+    quotationNo: qNo,
+    quotationDate: document.getElementById("qDate").value,
+    customer: document.getElementById("qCustomer").value,
+    status: document.getElementById("qStatus").value,
+    value: Number(document.getElementById("qValue").value),
+    createdAt: serverTimestamp()
   });
 
-  alert("Quotation Saved Successfully!");
+  alert("Quotation saved successfully");
 };
 
-import {
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+/* ================= SEARCH QUOTATION ================= */
 window.searchQuotation = async function () {
 
-  let searchNo =
-    document.getElementById("searchQuotationNo").value;
+  const qNo = document.getElementById("searchQNo").value.trim();
+  const customer = document.getElementById("searchCustomer").value;
 
-  const ref = doc(db, "quotations", searchNo);
-  const snap = await getDoc(ref);
+  const tableBody = document.getElementById("resultTableBody");
+  tableBody.innerHTML = "";
+  document.getElementById("searchResultArea").style.display = "block";
 
-  if (snap.exists()) {
+  // Search by Quotation No
+  if (qNo) {
+    const ref = doc(db, "quotations", qNo);
+    const snap = await getDoc(ref);
 
-    let data = snap.data();
+    if (!snap.exists()) {
+      alert("Quotation not found");
+      return;
+    }
 
-    document.getElementById("customer").value = data.customer;
-    document.getElementById("status").value = data.status;
-    document.getElementById("value").value = data.value;
-
-    alert("Quotation Found!");
-
-  } else {
-    alert("Quotation Not Found!");
+    addRow(snap.data());
+    return;
   }
+
+  // Search by Customer
+  let q = query(collection(db, "quotations"));
+  if (customer) {
+    q = query(collection(db, "quotations"), where("customer", "==", customer));
+  }
+
+  const snap = await getDocs(q);
+  snap.forEach(doc => addRow(doc.data()));
+};
+
+/* ================= ADD RESULT ROW ================= */
+function addRow(data) {
+  const row = `
+    <tr>
+      <td>${data.quotationDate || ""}</td>
+      <td>${data.quotationNo || ""}</td>
+      <td>${data.customer || ""}</td>
+      <td>${data.status || ""}</td>
+      <td>${data.value || ""}</td>
+      <td>-</td>
+    </tr>
+  `;
+  document.getElementById("resultTableBody").insertAdjacentHTML("beforeend", row);
+}
+
+/* ================= CLEAR ================= */
+window.clearQuotation = function () {
+  ["qDate", "qNo", "qCustomer", "qStatus", "qValue"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+};
+
+window.clearSearch = function () {
+  document.getElementById("searchQNo").value = "";
+  document.getElementById("searchCustomer").value = "";
+  document.getElementById("searchResultArea").style.display = "none";
 };
