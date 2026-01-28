@@ -50,93 +50,11 @@ function addInvoiceRow() {
     `;
 }
 
-async function submitQuotation() {
-
-    function formatDateDMY(dateStr) {
-    if (!dateStr) return "";
-    const [y, m, d] = dateStr.split("-");
-    return `${d}-${m}-${y}`;
-}
 
 
-    if (!allFieldsFilled()) {
-        alert("Kindly fill all the fields");
-        return;
-    }
-
-    const qNo = document.getElementById("qNo").value.trim();
-
-    //if (await quotationExists(qNo)) {
-      //  alert("Quotation No already exists");
-        //return;
-    //}
-
-    const fileInput = document.getElementById("qPdf");
-    let file = fileInput.files[0];
-
-    if (!validatePdf(file)) return;
-
-    if (file) {
-        file = renamePdf(file, qNo);
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = function () {
-
-        const base64File = file ? reader.result.split(",")[1] : "";
-
-        const data = {
-            qDate: formatDateDMY(document.getElementById("qDate").value),
-            qNo: qNo,
-            customer: document.getElementById("qCustomer").value,
-            status: document.getElementById("qStatus").value,
-            value: document.getElementById("qValue").value,
-            pdfBase64: base64File,
-            pdfName: file ? file.name : ""
-        };
-
-        fetch("https://script.google.com/macros/s/AKfycbxQqAlHZy2LvVhR-0HsS-Hhy9SUNldxGFJ1RaAwan5mZ8MR_gAiEiaaIHBSbnDCdGZC/exec", {
-            method: "POST",
-            body: JSON.stringify(data)
-        })
-       .then(res => res.json())
-.then(result => {
-    if (result.success) {
-        alert(result.message);
-        clearQuotation();
-    } else if (result.message === "DUPLICATE") {
-        alert("Quotation No already exists");
-    } else {
-        alert("Error: " + result.message);
-    }
-})
 
 
-        .catch(() => alert("Error saving quotation"));
-    };
 
-    if (file) reader.readAsDataURL(file);
-    else reader.onload();
-}
-
-
-function validatePdf(file) {
-    if (!file) return true;
-    if (file.type !== "application/pdf") {
-        alert("Select proper PDF file");
-        return false;
-    }
-    return true;
-}
-//Quotation no Already exists
-async function quotationExists(qNo) {
-    const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbzTPAgzE_BadrDmg3MH8lKxLq8vIVT1zVhP0OmYS4pGhx51uIYMQdr54GgCfmrZbVUJ/exec?qNo=" + qNo
-    );
-    const data = await res.json();
-    return data.exists === true;
-}
 
 //Required fields check popup
 function allFieldsFilled() {
@@ -218,41 +136,7 @@ function clearSearch() {
 }
 
 
-//Auto-suggest Quotation No Q-type dropdown
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    const qNoInput = document.getElementById("searchQNo");
-    if (!qNoInput) return;
-
-    qNoInput.addEventListener("input", function () {
-        const value = this.value.trim();
-        if (!value) return;
-
-        fetch(WEB_APP_URL, {
-            method: "POST",
-            body: JSON.stringify({
-                action: "suggestQNo",
-                prefix: value
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            const list = document.getElementById("qNoList");
-            list.innerHTML = "";
-
-            if (!data.results) return;
-
-            data.results.forEach(q => {
-                const option = document.createElement("option");
-                option.value = q;
-                list.appendChild(option);
-            });
-        })
-        .catch(() => console.log("Suggestion error"));
-    });
-
-});
 
 
 // -------- CT INDIA STOCKS --------
@@ -301,5 +185,6 @@ function clearStockSearch() {
     document.getElementById("searchPartId").value = "";
     document.getElementById("searchPartDesc").value = "";
 }
+
 
 
