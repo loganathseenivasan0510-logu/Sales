@@ -187,10 +187,6 @@ function clearStockSearch() {
     document.getElementById("searchPartDesc").value = "";
 }
 
-
-const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbwSTRFx7IH9HzkhWeD_Rx8Vhm5Pc1tRvjLNh2u6C554Ysht4kF0NlKjecZv2GW0LDN_wg/exec";
-
 function allFieldsFilled() {
   const fields = ["qDate", "qNo", "qCustomer", "qStatus", "qValue"];
   return fields.every(id => document.getElementById(id).value.trim() !== "");
@@ -260,4 +256,5 @@ async function submitQuotation() {
       console.log(err);
     });
 }
+
 
