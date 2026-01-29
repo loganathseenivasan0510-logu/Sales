@@ -199,55 +199,31 @@ function toBase64(file) {
 }
 
 // ✅ MAIN SUBMIT FUNCTION
-async function submitQuotation() {
+function submitQuotation() {
 
-  if (!allFieldsFilled()) {
-    alert("⚠ Please fill all required fields!");
-    return;
-  }
+  const formData = new FormData();
 
-  const qDate = document.getElementById("qDate").value;
-  const qNo = document.getElementById("qNo").value;
-  const customer = document.getElementById("qCustomer").value;
-  const status = document.getElementById("qStatus").value;
-  const value = document.getElementById("qValue").value;
-
-  const pdfFile = document.getElementById("qPdf").files[0];
-
-  let pdfBase64 = "";
-  let pdfName = "";
-
-  if (pdfFile) {
-    pdfBase64 = await toBase64(pdfFile);
-    pdfName = qNo + ".pdf";
-  }
+  formData.append("qDate", document.getElementById("qDate").value);
+  formData.append("qNo", document.getElementById("qNo").value);
+  formData.append("customer", document.getElementById("qCustomer").value);
+  formData.append("status", document.getElementById("qStatus").value);
+  formData.append("value", document.getElementById("qValue").value);
 
   fetch(WEB_APP_URL, {
     method: "POST",
-    body: JSON.stringify({
-      qDate,
-      qNo,
-      customer,
-      status,
-      value,
-      pdfBase64,
-      pdfName
-    })
+    body: formData
   })
-    .then(res => res.json())
-    .then(response => {
-      if (response.success) {
-        alert("✅ Successfully Submitted!!");
-        clearQuotation();
-      } else {
-        alert("❌ Error: " + response.message);
-      }
+    .then(res => res.text())
+    .then(() => {
+      alert("✅ Submitted Successfully!");
+      clearQuotation();
     })
     .catch(err => {
       alert("❌ Submission Failed!");
       console.log(err);
     });
 }
+
 
 
 
