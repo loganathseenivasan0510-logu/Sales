@@ -187,15 +187,7 @@ function clearStockSearch() {
     document.getElementById("searchPartDesc").value = "";
 }
 
-function allFieldsFilled() {
-  const fields = ["qDate", "qNo", "qCustomer", "qStatus", "qValue"];
-  return fields.every(id => document.getElementById(id).value.trim() !== "");
-}
 
-function clearQuotation() {
-  document.querySelectorAll("#quotation input, #quotation select")
-    .forEach(el => el.value = "");
-}
 
 function toBase64(file) {
   return new Promise((resolve, reject) => {
@@ -256,5 +248,6 @@ async function submitQuotation() {
       console.log(err);
     });
 }
+
 
 
