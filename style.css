@@ -171,6 +171,18 @@ html, body {
     box-sizing: border-box;
 }
 
+.btn.primary {
+    background: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn.primary:hover {
+    background: black;
+    color: white;
+}
+
 
 
 
