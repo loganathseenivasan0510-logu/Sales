@@ -1,4 +1,5 @@
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxQqAlHZy2LvVhR-0HsS-Hhy9SUNldxGFJ1RaAwan5mZ8MR_gAiEiaaIHBSbnDCdGZC/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwSTRFx7IH9HzkhWeD_Rx8Vhm5Pc1tRvjLNh2u6C554Ysht4kF0NlKjecZv2GW0LDN_wg/exec";
+
 
 function showPage(pageId, element) {
 
@@ -190,7 +191,16 @@ function clearStockSearch() {
 const WEB_APP_URL =
   "https://script.google.com/macros/s/AKfycbwSTRFx7IH9HzkhWeD_Rx8Vhm5Pc1tRvjLNh2u6C554Ysht4kF0NlKjecZv2GW0LDN_wg/exec";
 
-// ✅ Convert File to Base64
+function allFieldsFilled() {
+  const fields = ["qDate", "qNo", "qCustomer", "qStatus", "qValue"];
+  return fields.every(id => document.getElementById(id).value.trim() !== "");
+}
+
+function clearQuotation() {
+  document.querySelectorAll("#quotation input, #quotation select")
+    .forEach(el => el.value = "");
+}
+
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -200,8 +210,9 @@ function toBase64(file) {
   });
 }
 
-// ✅ Submit Quotation Entry
+// ✅ MAIN SUBMIT FUNCTION
 async function submitQuotation() {
+
   if (!allFieldsFilled()) {
     alert("⚠ Please fill all required fields!");
     return;
@@ -218,13 +229,11 @@ async function submitQuotation() {
   let pdfBase64 = "";
   let pdfName = "";
 
-  // ✅ If PDF selected → Convert
   if (pdfFile) {
     pdfBase64 = await toBase64(pdfFile);
-    pdfName = qNo + ".pdf"; // Rename PDF
+    pdfName = qNo + ".pdf";
   }
 
-  // ✅ Send Data to Apps Script
   fetch(WEB_APP_URL, {
     method: "POST",
     body: JSON.stringify({
@@ -241,8 +250,7 @@ async function submitQuotation() {
     .then(response => {
       if (response.success) {
         alert("✅ Successfully Submitted!!");
-
-        clearQuotation(); // Clear form
+        clearQuotation();
       } else {
         alert("❌ Error: " + response.message);
       }
@@ -252,5 +260,4 @@ async function submitQuotation() {
       console.log(err);
     });
 }
-
 
