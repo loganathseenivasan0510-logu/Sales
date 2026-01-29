@@ -187,4 +187,70 @@ function clearStockSearch() {
 }
 
 
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbwSTRFx7IH9HzkhWeD_Rx8Vhm5Pc1tRvjLNh2u6C554Ysht4kF0NlKjecZv2GW0LDN_wg/exec";
+
+// ✅ Convert File to Base64
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ✅ Submit Quotation Entry
+async function submitQuotation() {
+  if (!allFieldsFilled()) {
+    alert("⚠ Please fill all required fields!");
+    return;
+  }
+
+  const qDate = document.getElementById("qDate").value;
+  const qNo = document.getElementById("qNo").value;
+  const customer = document.getElementById("qCustomer").value;
+  const status = document.getElementById("qStatus").value;
+  const value = document.getElementById("qValue").value;
+
+  const pdfFile = document.getElementById("qPdf").files[0];
+
+  let pdfBase64 = "";
+  let pdfName = "";
+
+  // ✅ If PDF selected → Convert
+  if (pdfFile) {
+    pdfBase64 = await toBase64(pdfFile);
+    pdfName = qNo + ".pdf"; // Rename PDF
+  }
+
+  // ✅ Send Data to Apps Script
+  fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      qDate,
+      qNo,
+      customer,
+      status,
+      value,
+      pdfBase64,
+      pdfName
+    })
+  })
+    .then(res => res.json())
+    .then(response => {
+      if (response.success) {
+        alert("✅ Successfully Submitted!!");
+
+        clearQuotation(); // Clear form
+      } else {
+        alert("❌ Error: " + response.message);
+      }
+    })
+    .catch(err => {
+      alert("❌ Submission Failed!");
+      console.log(err);
+    });
+}
+
 
