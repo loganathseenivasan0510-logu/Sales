@@ -47,8 +47,14 @@ try:
         page.on("pageerror", lambda e: console_errors.append(str(e)))
 
         def ready():
-            page.wait_for_function("() => window.Blazor !== undefined", timeout=20000)
-            page.wait_for_timeout(700)  # Circuit aufbauen
+            # Kein wait_for_function: das nutzt eval und wird (korrekt) von der CSP der App blockiert
+            for _ in range(80):
+                if page.evaluate("() => typeof window.Blazor !== 'undefined'"):
+                    break
+                page.wait_for_timeout(250)
+            else:
+                raise TimeoutError("Blazor did not start")
+            page.wait_for_timeout(800)  # Circuit aufbauen
 
         def go(path):
             page.goto(base + path); ready()
