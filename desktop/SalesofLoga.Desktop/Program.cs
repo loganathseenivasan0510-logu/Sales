@@ -51,11 +51,12 @@ try
         bootLog.LogInformation("Command-line import: {Records} records, {Skipped} skipped, {Rejected} rejected attachments", r.Records, r.Skipped, r.RejectedAttachments);
     }
 
+    var contentRoot = WebAssets.ResolveContentRoot(paths, bootLog);
     var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     {
         Args = args,
-        ContentRootPath = AppContext.BaseDirectory,
-        WebRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot"),
+        ContentRootPath = contentRoot,
+        WebRootPath = Path.Combine(contentRoot, "wwwroot"),
     });
     builder.Logging.ClearProviders();
     builder.Logging.AddProvider(fileLogs);
@@ -99,7 +100,8 @@ try
     app.UseMiddleware<LocalAccessMiddleware>();
     app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
     app.UseAntiforgery();
-    app.MapStaticAssets();
+    var manifest = Path.Combine(contentRoot, WebAssets.ManifestName);
+    if (File.Exists(manifest)) app.MapStaticAssets(manifest); else app.MapStaticAssets();
     Endpoints.Map(app);
     app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 

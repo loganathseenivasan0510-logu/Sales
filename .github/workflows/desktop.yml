@@ -22,8 +22,9 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Publish single-file EXE (win-x64, self-contained)
-        run: dotnet publish desktop/SalesofLoga.Desktop/SalesofLoga.Desktop.csproj -c Release -r win-x64 -o publish
+      - name: Publish single-file EXE (win-x64, self-contained, assets embedded)
+        shell: pwsh
+        run: ./desktop/publish.ps1 -Output publish
 
       - name: Show publish output
         shell: pwsh

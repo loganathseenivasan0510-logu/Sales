@@ -15,6 +15,8 @@ public sealed class AppPaths
     public string BackupDir => Path.Combine(DataDir, "backups");
     public string LogDir => Path.Combine(DataDir, "logs");
     public string InstanceFile => Path.Combine(DataDir, "instance.json");
+    /// <summary>Entpackte Web-Assets der Single-File-EXE (pro Benutzer, unabhängig von --data)</summary>
+    public string AppCacheDir { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create), "SalesofLoga", "app");
 
     public AppPaths(string? overrideDir)
     {

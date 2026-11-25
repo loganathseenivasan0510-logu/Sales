@@ -24,11 +24,16 @@
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <DebugType>embedded</DebugType>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <!-- Web-Assets (wwwroot, blazor.web.js, Endpoint-Manifest) als Zip in die EXE einbetten.
+       Das Zip erzeugt publish.ps1 in einem ersten Publish-Durchlauf. -->
+  <ItemGroup Condition="'$(EmbedWebAssets)' == 'true'">
+    <EmbeddedResource Include="$(MSBuildProjectDirectory)\obj\webassets\webassets.zip" LogicalName="webassets.zip" />
+  </ItemGroup>
 
   <!-- Nur für Offline-Compile-Checks ohne NuGet (blazor.web.js fehlt dann zur Laufzeit) -->
   <ItemGroup Condition="'$(OfflineBuild)' == 'true'">
