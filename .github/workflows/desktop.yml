@@ -22,17 +22,6 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Diagnose static web assets
-        shell: pwsh
-        run: |
-          $proj = 'desktop/SalesofLoga.Desktop/SalesofLoga.Desktop.csproj'
-          dotnet restore $proj -r win-x64 | Out-Null
-          Get-ChildItem "$env:USERPROFILE/.nuget/packages" -Directory | Where-Object Name -like '*internal.assets*' | ForEach-Object { Get-ChildItem $_.FullName -Recurse -File | Select-Object -First 15 FullName }
-          dotnet msbuild $proj -t:ResolveStaticWebAssetsInputs -p:RuntimeIdentifier=win-x64 -p:Configuration=Release -getProperty:RequiresAspNetWebAssets -getItem:StaticWebAsset > swa.json
-          $j = Get-Content swa.json -Raw | ConvertFrom-Json
-          "RequiresAspNetWebAssets = $($j.Properties.RequiresAspNetWebAssets)"
-          $j.Items.StaticWebAsset | Select-Object @{n='Rel';e={$_.RelativePath}}, SourceType, AssetKind, AssetMode | Format-Table -AutoSize | Out-String -Width 220
-
       - name: Publish single-file EXE (win-x64, self-contained, assets embedded)
         shell: pwsh
         run: ./desktop/publish.ps1 -Output publish

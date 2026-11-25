@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Baut SalesofLoga.exe als EINE Datei (win-x64, self-contained, Web-Assets eingebettet).
 .DESCRIPTION
@@ -20,6 +20,19 @@ New-Item -ItemType Directory -Force $zipDir | Out-Null
 Write-Host '== 1/3 Publish web assets' -ForegroundColor Cyan
 dotnet publish $proj -c $Configuration -r win-x64 -p:PublishSingleFile=false -p:SelfContained=false -o $stage
 if ($LASTEXITCODE) { throw 'publish (stage) failed' }
+
+# blazor.web.js kommt aus dem Paket Microsoft.AspNetCore.App.Internal.Assets, wird beim Publish
+# aber nicht nach wwwroot kopiert (.NET 10.0.x). Fehlt die Datei, aus dem NuGet-Cache übernehmen.
+$fw = Join-Path $stage 'wwwroot\_framework'
+if (-not (Test-Path (Join-Path $fw 'blazor.web.js'))) {
+  $nuget = ((dotnet nuget locals global-packages -l) -replace '^global-packages:\s*', '').Trim()
+  $pkg = Get-ChildItem (Join-Path $nuget 'microsoft.aspnetcore.app.internal.assets') -Directory |
+    Sort-Object { [version]($_.Name -replace '-.*$', '') } -Descending | Select-Object -First 1
+  if (-not $pkg) { throw 'Package microsoft.aspnetcore.app.internal.assets not found in NuGet cache' }
+  New-Item -ItemType Directory -Force $fw | Out-Null
+  Copy-Item (Join-Path $pkg.FullName '_framework\blazor.web.js') $fw
+  Write-Host "blazor.web.js taken from $($pkg.FullName)"
+}
 
 Write-Host '== 2/3 Pack webassets.zip' -ForegroundColor Cyan
 $pack = Join-Path $zipDir 'pack'

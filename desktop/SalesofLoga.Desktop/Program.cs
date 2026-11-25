@@ -98,6 +98,7 @@ try
 
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseMiddleware<LocalAccessMiddleware>();
+    app.UseStaticFiles(); // u. a. _framework/blazor.web.js, falls nicht im Endpoint-Manifest
     app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
     app.UseAntiforgery();
     var manifest = Path.Combine(contentRoot, WebAssets.ManifestName);
