@@ -1,0 +1,77 @@
+name: Desktop app (Blazor + SQLite) – build, tests, security
+
+on:
+  push:
+    branches: [feature/blazor-sqlite, main]
+    paths: ['desktop/**', 'tests/**', '.github/workflows/desktop.yml']
+  pull_request:
+    paths: ['desktop/**', 'tests/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish single-file EXE (win-x64, self-contained)
+        run: dotnet publish desktop/SalesofLoga.Desktop/SalesofLoga.Desktop.csproj -c Release -r win-x64 -o publish
+
+      - name: Show publish output
+        shell: pwsh
+        run: |
+          Get-ChildItem publish -Recurse | Select-Object FullName, Length | Format-Table -AutoSize
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          (Get-FileHash publish/SalesofLoga.exe -Algorithm SHA256).Hash | Out-File artifacts/SalesofLoga.exe.sha256
+
+      - name: Self-test (winsqlite3, BLOBs, backup)
+        shell: pwsh
+        run: |
+          $d = Join-Path $env:RUNNER_TEMP 'selftest'
+          $p = Start-Process publish/SalesofLoga.exe -ArgumentList '--selftest','--data',"`"$d`"" -Wait -PassThru -NoNewWindow
+          Get-Content "$d/logs/*.log"
+          if ($p.ExitCode -ne 0) { throw "Selftest failed with exit code $($p.ExitCode)" }
+
+      - name: External security tests (+ built-in security check)
+        shell: pwsh
+        run: ./tests/security/Invoke-SecurityTests.ps1 -ExePath publish/SalesofLoga.exe -OutFile artifacts/security-tests-external.html
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install playwright==1.49.1
+          python -m playwright install chromium
+
+      - name: UI tests (Playwright against the EXE)
+        run: python tests/e2e/test_desktop.py --exe publish/SalesofLoga.exe --out artifacts
+
+      - name: Upload EXE
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SalesofLoga-win-x64
+          path: |
+            publish/SalesofLoga.exe
+            artifacts/SalesofLoga.exe.sha256
+            desktop/README.md
+          retention-days: 30
+
+      - name: Upload test & security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: artifacts/
+          retention-days: 30

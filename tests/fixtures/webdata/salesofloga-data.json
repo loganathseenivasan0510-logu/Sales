@@ -1,0 +1,163 @@
+{
+  "app": "SalesofLoga",
+  "schemaVersion": 1,
+  "createdAt": "2026-11-20T09:00:00.000Z",
+  "updatedAt": "2026-11-24T09:00:00.000Z",
+  "quotations": [
+    {
+      "id": "11111111-0000-4000-8000-000000000001",
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z",
+      "qDate": "2026-11-18",
+      "qNo": "QT-2026-0812",
+      "customer": "EMMVEE",
+      "status": "Open",
+      "value": 1842500,
+      "currency": "INR",
+      "attachment": null,
+      "createdBy": {
+        "id": "local:daniel könig",
+        "name": "Daniel König"
+      }
+    },
+    {
+      "id": "11111111-0000-4000-8000-000000000002",
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z",
+      "qDate": "2026-11-20",
+      "qNo": "QT-2026-0815",
+      "customer": "TP Solar",
+      "status": "Open",
+      "value": 965000.5,
+      "currency": "INR",
+      "attachment": {
+        "path": "attachments/quotations/QT-2026-0815__a1b2c3d4.pdf",
+        "name": "Angebot TP Solar.pdf",
+        "size": 60,
+        "type": "application/pdf"
+      },
+      "createdBy": {
+        "id": "local:daniel könig",
+        "name": "Daniel König"
+      }
+    },
+    {
+      "id": "11111111-0000-4000-8000-000000000003",
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z",
+      "qDate": "2026-11-21",
+      "qNo": "QT-2026-0816",
+      "customer": "Tata Bangalore",
+      "status": "Closed",
+      "value": 2310000,
+      "currency": "INR",
+      "attachment": {
+        "path": "attachments/quotations/QT-2026-0816__deadbeef.pdf",
+        "name": "invoice.pdf",
+        "size": 20,
+        "type": "application/pdf"
+      },
+      "createdBy": {
+        "id": "local:priya raman",
+        "name": "Priya Raman"
+      }
+    },
+    {
+      "id": "11111111-0000-4000-8000-000000000004",
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z",
+      "qDate": "2026-11-22",
+      "qNo": "QT-2026-0817",
+      "customer": "Jupiter",
+      "status": "Open",
+      "value": 41000,
+      "currency": "EUR",
+      "createdBy": {
+        "id": "local:priya raman",
+        "name": "Priya Raman"
+      },
+      "attachment": {
+        "path": "../../outside.pdf",
+        "name": "x.pdf",
+        "size": 1,
+        "type": "application/pdf"
+      }
+    }
+  ],
+  "poGermany": [
+    {
+      "id": "22222222-0000-4000-8000-000000000001",
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z",
+      "poDate": "2026-11-19",
+      "poNo": "DE-4711",
+      "customer": "Renew",
+      "status": "In Progress",
+      "value": 120000,
+      "currency": "EUR",
+      "createdBy": {
+        "id": "local:daniel könig",
+        "name": "Daniel König"
+      }
+    }
+  ],
+  "poCustomer": [
+    {
+      "id": "33333333-0000-4000-8000-000000000001",
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z",
+      "poDate": "2026-11-23",
+      "qNo": "QT-2026-0812",
+      "poNo": "4500012345",
+      "customer": "EMMVEE",
+      "status": "Open",
+      "value": 1842500,
+      "currency": "INR",
+      "createdBy": {
+        "id": "local:daniel könig",
+        "name": "Daniel König"
+      }
+    }
+  ],
+  "stock": [
+    {
+      "id": "44444444-0000-4000-8000-000000000001",
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z",
+      "stockDate": "2026-11-24",
+      "partId": "P-100",
+      "description": "<img src=x onerror=\"window.__xss=1\">",
+      "qty": 3,
+      "createdBy": {
+        "id": "local:daniel könig",
+        "name": "Daniel König"
+      }
+    },
+    {
+      "id": "44444444-0000-4000-8000-000000000002",
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z",
+      "stockDate": "2026-11-24",
+      "partId": "P-200",
+      "description": "=HYPERLINK(\"http://evil.example\",\"click\")",
+      "qty": 40,
+      "createdBy": {
+        "id": "local:priya raman",
+        "name": "Priya Raman"
+      }
+    }
+  ],
+  "audit": [
+    {
+      "ts": "2026-11-20T09:00:00.000Z",
+      "user": {
+        "id": "local:daniel könig",
+        "name": "Daniel König"
+      },
+      "action": "create",
+      "entity": "quotation",
+      "recordId": "11111111-0000-4000-8000-000000000001",
+      "label": "Quotation QT-2026-0812"
+    }
+  ]
+}

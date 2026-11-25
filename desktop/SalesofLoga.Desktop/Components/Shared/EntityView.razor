@@ -1,0 +1,317 @@
+@inject SalesRepository Repo
+@inject AppRuntime Rt
+@inject ToastService Toasts
+@inject ILogger<EntityView> Log
+
+<PageTitle>@Entity.Nav · SalesofLoga</PageTitle>
+<div class="page-head"><h1>@Entity.Nav.Replace(" Entry", "")</h1></div>
+
+<div class="grid-2">
+    <form class="card form-card @(_editingId != null ? "editing" : null)" id="form-@Entity.Key" @onsubmit="SaveAsync" novalidate>
+        <div class="card-head">
+            <h2 id="form-title-@Entity.Key">@(_editingId != null ? $"Edit {Entity.Singular} {_editingKey}" : $"New {Entity.Singular}")</h2>
+            @if (_editingId != null)
+            {
+                <button type="button" class="btn btn-link" id="cancel-edit-@Entity.Key" @onclick="ResetForm">Cancel editing</button>
+            }
+        </div>
+
+        @foreach (var f in Entity.Fields)
+        {
+            var id = $"{Entity.Key}-{f.Name}";
+            var err = _errors.GetValueOrDefault(f.Name);
+            <div class="field field-@f.Type.ToString().ToLowerInvariant()">
+                <label for="@id">
+                    @f.Label
+                    @if (f.Required)
+                    {
+                        <span class="req" aria-hidden="true"> *</span>
+                    }
+                </label>
+                @switch (f.Type)
+                {
+                    case FieldType.Select:
+                        <select id="@id" @bind="_form[f.Name]" aria-invalid="@(err != null ? "true" : null)" aria-describedby="@id-err">
+                            <option value="">Select @f.Label.ToLowerInvariant()</option>
+                            @foreach (var o in Options(f))
+                            {
+                                <option value="@o">@o</option>
+                            }
+                        </select>
+                        break;
+                    case FieldType.Money:
+                        <div class="money">
+                            <input id="@id" type="text" inputmode="decimal" autocomplete="off" @bind="_form[f.Name]" aria-invalid="@(err != null ? "true" : null)" aria-describedby="@id-err" />
+                            <select id="@id-currency" aria-label="Currency" @bind="_currency">
+                                @foreach (var c in _md.Currencies)
+                                {
+                                    <option value="@c">@c</option>
+                                }
+                            </select>
+                        </div>
+                        break;
+                    case FieldType.Int:
+                        <input id="@id" type="text" inputmode="numeric" autocomplete="off" @bind="_form[f.Name]" aria-invalid="@(err != null ? "true" : null)" aria-describedby="@id-err" />
+                        break;
+                    case FieldType.File:
+                        <div class="file-field">
+                            <InputFile id="@id" accept="@Accept(f)" OnChange="e => OnFileAsync(f, e)" @key="_fileInputKey" aria-describedby="@($"{id}-err")" />
+                            @if (_file != null)
+                            {
+                                <div class="file-current">Selected: @_file.FileName (@Fmt.Bytes(_file.Data.Length))</div>
+                            }
+                            else if (_editingAttachment != null)
+                            {
+                                <div class="file-current">
+                                    <span>Current: @_editingAttachment.FileName (@Fmt.Bytes(_editingAttachment.Size)) – choose a file to replace it.</span>
+                                    <label class="check"><input type="checkbox" id="@id-remove" @bind="_removeAttachment" /> Remove attachment</label>
+                                </div>
+                            }
+                        </div>
+                        break;
+                    case FieldType.Date:
+                        <input id="@id" type="date" value="@_form[f.Name]" @onchange="e => _form[f.Name] = e.Value?.ToString() ?? string.Empty" aria-invalid="@(err != null ? "true" : null)" aria-describedby="@id-err" />
+                        break;
+                    default:
+                        if (f.SuggestQuotations)
+                        {
+                            <input id="@id" type="text" list="@id-list" maxlength="@f.MaxLength" autocomplete="off" @bind="_form[f.Name]" @bind:after="AutoFillCustomer" aria-describedby="@id-err" />
+                            <datalist id="@id-list">
+                                @foreach (var q in _quotations)
+                                {
+                                    <option value="@q.QNo">@q.Customer · @Fmt.Date(q.Date)</option>
+                                }
+                            </datalist>
+                        }
+                        else
+                        {
+                            <input id="@id" type="text" maxlength="@(f.MaxLength > 0 ? f.MaxLength : null)" placeholder="@f.Placeholder" autocomplete="off" @bind="_form[f.Name]" aria-invalid="@(err != null ? "true" : null)" aria-describedby="@id-err" />
+                        }
+                        break;
+                }
+                @if (f.Hint != null)
+                {
+                    <div class="field-hint">@f.Hint</div>
+                }
+                @if (err != null)
+                {
+                    <div class="field-error" id="@id-err" role="alert">@err</div>
+                }
+            </div>
+        }
+
+        <div class="actions">
+            <button type="button" class="btn" @onclick="ResetForm" disabled="@_busy">Clear</button>
+            <button type="submit" class="btn btn-primary" id="submit-@Entity.Key" disabled="@_busy">@(_busy ? "Saving…" : _editingId != null ? "Save changes" : "Submit")</button>
+        </div>
+    </form>
+
+    <form class="card search-card" id="search-@Entity.Key" @onsubmit="Load" novalidate>
+        <div class="card-head"><h2>Search</h2></div>
+        @foreach (var f in Entity.Fields.Where(x => x.Search != SearchMode.None))
+        {
+            var sid = $"{Entity.Key}-s-{f.Name}";
+            <div class="field">
+                <label for="@sid">@f.Label</label>
+                @if (f.Type == FieldType.Select)
+                {
+                    <select id="@sid" @bind="_search[f.Name]">
+                        <option value="">Any</option>
+                        @foreach (var o in Options(f))
+                        {
+                            <option value="@o">@o</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input id="@sid" type="search" placeholder="Contains…" autocomplete="off" @bind="_search[f.Name]" />
+                }
+            </div>
+        }
+        <label class="check"><input type="checkbox" id="@Entity.Key-s-mine" @bind="_mine" /> Only my records</label>
+        <div class="actions">
+            <button type="button" class="btn" @onclick="ResetSearch">Reset</button>
+            <a class="btn" href="@ExportUrl" download>Export CSV</a>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+</div>
+
+<div class="card results-card">
+    <div class="card-head"><h2>Records</h2><span class="muted" id="count-@Entity.Key">@_records.Count @(_records.Count == 1 ? "record" : "records")</span></div>
+    <RecordsTable Entity="Entity" Records="_records" CanEdit="r => Repo.CanEdit(r, Rt.User, _md)" LowStockThreshold="_md.LowStockThreshold"
+                  EditingId="_editingId" OnEdit="StartEdit" OnDelete="DeleteAsync" />
+</div>
+
+<ConfirmDialog @ref="_confirm" />
+
+@code {
+    [Parameter, EditorRequired] public EntityDef Entity { get; set; } = default!;
+
+    private Dictionary<string, string> _form = new();
+    private Dictionary<string, string> _search = new();
+    private Dictionary<string, string> _errors = new();
+    private string _currency = "INR";
+    private bool _mine;
+    private NewAttachment? _file;
+    private AttachmentInfo? _editingAttachment;
+    private bool _removeAttachment;
+    private int _fileInputKey;
+    private string? _editingId, _editingKey;
+    private bool _busy;
+    private List<SalesRecord> _records = new();
+    private List<(string QNo, string Customer, string Date)> _quotations = new();
+    private MasterData _md = new();
+    private ConfirmDialog _confirm = default!;
+
+    private EntityDef? _loadedFor;
+
+    protected override void OnParametersSet()
+    {
+        if (ReferenceEquals(_loadedFor, Entity)) return;
+        _loadedFor = Entity;
+        _md = Repo.GetMaster();
+        _form = Entity.Fields.ToDictionary(f => f.Name, _ => "");
+        _search = Entity.Fields.Where(f => f.Search != SearchMode.None).ToDictionary(f => f.Name, _ => "");
+        _currency = _md.DefaultCurrency;
+        _errors.Clear();
+        _editingId = null;
+        Load();
+    }
+
+    private IReadOnlyList<string> Options(FieldDef f) => _md.OptionsFor(f.Options);
+    private static string Accept(FieldDef f) => string.Join(",", (f.Mimes ?? Array.Empty<string>()).Concat((f.Exts ?? Array.Empty<string>()).Select(e => "." + e)));
+
+    private string ExportUrl => $"export/{Entity.Slug}.csv?" + string.Join("&", _search.Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
+        .Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
+
+    private void Load()
+    {
+        try
+        {
+            _records = Repo.List(Entity, _search, _mine ? Rt.User.Id : null);
+            if (Entity.Fields.Any(f => f.SuggestQuotations)) _quotations = Repo.QuotationLookup();
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Loading {Entity} failed", Entity.Key);
+            Toasts.Show("Loading failed – see log file.", "error");
+        }
+    }
+
+    private void ResetSearch()
+    {
+        foreach (var k in _search.Keys.ToList()) _search[k] = "";
+        _mine = false;
+        Load();
+    }
+
+    private void ResetForm()
+    {
+        foreach (var k in _form.Keys.ToList()) _form[k] = "";
+        _currency = _md.DefaultCurrency;
+        _errors.Clear();
+        _file = null;
+        _editingAttachment = null;
+        _removeAttachment = false;
+        _editingId = _editingKey = null;
+        _fileInputKey++;
+    }
+
+    private void AutoFillCustomer()
+    {
+        var q = _quotations.FirstOrDefault(x => x.QNo.Equals(_form.GetValueOrDefault("qNo")?.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (q.QNo != null && string.IsNullOrEmpty(_form.GetValueOrDefault("customer"))) _form["customer"] = q.Customer;
+    }
+
+    private async Task OnFileAsync(FieldDef f, InputFileChangeEventArgs e)
+    {
+        _errors.Remove(f.Name);
+        _file = null;
+        var max = _md.MaxAttachmentMB * 1024L * 1024L;
+        if (e.File.Size > max) { _errors[f.Name] = $"File is larger than {_md.MaxAttachmentMB} MB."; return; }
+        try
+        {
+            using var ms = new MemoryStream();
+            await e.File.OpenReadStream(max).CopyToAsync(ms);
+            var file = new NewAttachment(e.File.Name, e.File.ContentType, ms.ToArray());
+            var err = Validator.CheckFile(f, file, _md.MaxAttachmentMB);
+            if (err != null) { _errors[f.Name] = err; Log.LogWarning("Upload rejected for {User}: {File} – {Error}", Rt.User.Account, e.File.Name, err); return; }
+            _file = file;
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Reading upload {File} failed", e.File.Name);
+            _errors[f.Name] = "The file could not be read.";
+        }
+    }
+
+    private void StartEdit(SalesRecord r)
+    {
+        ResetForm();
+        foreach (var f in Entity.DataFields)
+        {
+            _form[f.Name] = f.Type switch
+            {
+                FieldType.Money => r.Money(f.Name)?.ToString("0.##", CultureInfo.InvariantCulture) ?? "",
+                FieldType.Int => r.Int(f.Name)?.ToString(CultureInfo.InvariantCulture) ?? "",
+                _ => r.Text(f.Name)
+            };
+        }
+        _currency = r.Currency ?? _md.DefaultCurrency;
+        _editingAttachment = r.Attachment;
+        _editingId = r.Id;
+        _editingKey = r.Text(Entity.KeyField);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_busy) return; // Doppelklick-Schutz
+        _busy = true;
+        _errors.Clear();
+        try
+        {
+            var raw = new Dictionary<string, string>(_form);
+            SalesRecord saved = _editingId == null
+                ? await Repo.CreateAsync(Entity, raw, _currency, _file, Rt.User)
+                : await Repo.UpdateAsync(Entity, _editingId, raw, _currency, _file, _removeAttachment, Rt.User);
+            Toasts.Show($"{Entity.Singular} {saved.Text(Entity.KeyField)} {(_editingId == null ? "saved" : "updated")}.", "success");
+            ResetForm();
+            Load();
+        }
+        catch (ValidationException vex)
+        {
+            _errors = new Dictionary<string, string>(vex.Errors);
+            Toasts.Show("Please correct the highlighted fields.", "error");
+        }
+        catch (PermissionDeniedException pex) { Toasts.Show(pex.Message, "error"); }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Saving {Entity} failed", Entity.Key);
+            Toasts.Show($"Saving failed: {ex.Message}", "error");
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task DeleteAsync(SalesRecord r)
+    {
+        var key = r.Text(Entity.KeyField);
+        if (!await _confirm.AskAsync($"Delete {Entity.Singular.ToLowerInvariant()}?",
+                $"{Entity.Singular} {key} will be hidden from all lists. It stays in the database (marked as deleted) for traceability.", "Delete", danger: true))
+            return;
+        try
+        {
+            await Repo.DeleteAsync(Entity, r.Id, Rt.User);
+            if (_editingId == r.Id) ResetForm();
+            Toasts.Show($"{Entity.Singular} {key} deleted.", "success");
+            Load();
+        }
+        catch (PermissionDeniedException pex) { Toasts.Show(pex.Message, "error"); }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Deleting {Entity} {Id} failed", Entity.Key, r.Id);
+            Toasts.Show($"Delete failed: {ex.Message}", "error");
+        }
+    }
+}

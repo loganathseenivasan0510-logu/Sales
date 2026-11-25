@@ -1,0 +1,88 @@
+@* Reine Darstellung – wird auch vom Security Check (SC-11, XSS) gerendert. Alle Werte werden von Razor HTML-kodiert. *@
+<div class="table-wrap">
+    <table class="table" id="table-@Entity.Key">
+        <thead>
+            <tr>
+                @foreach (var f in Entity.Fields)
+                {
+                    <th scope="col" class="@(IsNum(f) ? "num" : null)">@(f.Type == FieldType.File ? "File" : f.Label)</th>
+                }
+                <th scope="col">Created by</th>
+                <th scope="col" class="actions-col"><span class="sr-only">Actions</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Records.Count == 0)
+            {
+                <tr><td colspan="@(Entity.Fields.Count + 2)" class="empty">No records found.</td></tr>
+            }
+            @foreach (var r in Records)
+            {
+                var editable = CanEdit(r);
+                <tr class="@(EditingId == r.Id ? "row-editing" : null)" @key="r.Id">
+                    @foreach (var f in Entity.Fields)
+                    {
+                        @switch (f.Type)
+                        {
+                            case FieldType.File:
+                                <td>
+                                    @if (r.Attachment != null)
+                                    {
+                                        <a class="btn btn-small" href="attachments/@r.Attachment.Id" target="_blank" rel="noopener" title="@r.Attachment.FileName">@(Entity.Key == "stock" ? "Image" : "PDF")</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="muted">–</span>
+                                    }
+                                </td>
+                                break;
+                            case FieldType.Money:
+                                <td class="num">@Fmt.Money(r.Money(f.Name), r.Currency)</td>
+                                break;
+                            case FieldType.Int:
+                                <td class="num @(Entity.Key == "stock" && r.Int(f.Name) <= LowStockThreshold ? "low" : null)">@Fmt.Number(r.Int(f.Name))</td>
+                                break;
+                            case FieldType.Date:
+                                <td>@Fmt.Date(r.Text(f.Name))</td>
+                                break;
+                            default:
+                                if (f.Name == "status")
+                                {
+                                    <td><span class="pill pill-@r.Text(f.Name).ToLowerInvariant().Replace(' ', '-')">@r.Text(f.Name)</span></td>
+                                }
+                                else
+                                {
+                                    <td>@r.Text(f.Name)</td>
+                                }
+                                break;
+                        }
+                    }
+                    <td class="muted" title="@(r.UpdatedAt != null ? $"Last change {Fmt.DateTime(r.UpdatedAt)} by {r.UpdatedByName}" : null)">@r.CreatedByName</td>
+                    <td class="actions-col">
+                        @if (editable)
+                        {
+                            <button type="button" class="btn btn-small" @onclick="() => OnEdit.InvokeAsync(r)">Edit</button>
+                            <button type="button" class="btn btn-small btn-ghost-danger" @onclick="() => OnDelete.InvokeAsync(r)">Delete</button>
+                        }
+                        else
+                        {
+                            <span class="muted lock" title="Only the creator (or an admin) can change this record.">read-only</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public EntityDef Entity { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<SalesRecord> Records { get; set; } = Array.Empty<SalesRecord>();
+    [Parameter, EditorRequired] public Func<SalesRecord, bool> CanEdit { get; set; } = _ => false;
+    [Parameter] public int LowStockThreshold { get; set; } = 5;
+    [Parameter] public string? EditingId { get; set; }
+    [Parameter] public EventCallback<SalesRecord> OnEdit { get; set; }
+    [Parameter] public EventCallback<SalesRecord> OnDelete { get; set; }
+
+    private static bool IsNum(FieldDef f) => f.Type is FieldType.Money or FieldType.Int;
+}
