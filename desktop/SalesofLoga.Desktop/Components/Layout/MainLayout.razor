@@ -1,0 +1,46 @@
+﻿@inherits LayoutComponentBase
+@inject AppRuntime Rt
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="layout">
+    <aside class="sidebar">
+        <a class="brand" href="/" aria-label="centrotherm – Overview">
+            <img src="assets/centrotherm-logo-white.png" width="1073" height="178" alt="centrotherm" />
+        </a>
+        <div class="brand-sub">Sales Dashboard – CT India</div>
+        <nav class="nav" aria-label="Main">
+            <NavLink class="nav-item" href="/" Match="NavLinkMatch.All"><span class="nav-icon" aria-hidden="true">◧</span>Overview</NavLink>
+            @foreach (var e in Schema.All)
+            {
+                <NavLink class="nav-item" href="@e.Slug"><span class="nav-icon" aria-hidden="true">@Icon(e)</span>@e.Nav</NavLink>
+            }
+            <div class="nav-sep" role="separator"></div>
+            <NavLink class="nav-item" href="security"><span class="nav-icon" aria-hidden="true">⛨</span>Security Check</NavLink>
+            <NavLink class="nav-item" href="settings"><span class="nav-icon" aria-hidden="true">⚙</span>Settings</NavLink>
+        </nav>
+        <div class="sidebar-foot">v@(Rt.Version) · SQLite</div>
+    </aside>
+
+    <div class="main-col">
+        <header class="topbar">
+            <div class="status">
+                <span class="badge badge-db" title="@Rt.Paths.DbPath">Local database · @Path.GetFileName(Rt.Paths.DbPath)</span>
+                <span class="user-chip" title="@Rt.User.Account">@Rt.User.Name@(Rt.IsAdmin ? " (admin)" : "")</span>
+            </div>
+        </header>
+        <main id="main" tabindex="-1">
+            @Body
+        </main>
+    </div>
+</div>
+<Toasts />
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unexpected error occurred – details are in the log file.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    private static string Icon(EntityDef e) => e.Key switch { "quotation" => "✎", "poGermany" => "⇄", "poCustomer" => "☰", _ => "▦" };
+}

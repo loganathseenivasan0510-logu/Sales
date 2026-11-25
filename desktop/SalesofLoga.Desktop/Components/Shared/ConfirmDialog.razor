@@ -1,0 +1,34 @@
+@if (Visible)
+{
+    <div class="modal-backdrop">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+            <h2 class="modal-title" id="confirm-title">@Title</h2>
+            <p>@Text</p>
+            <div class="modal-actions">
+                <button type="button" class="btn" @onclick="() => Close(false)">Cancel</button>
+                <button type="button" class="btn @(Danger ? "btn-danger" : "btn-primary")" @onclick="() => Close(true)">@OkLabel</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private TaskCompletionSource<bool>? _tcs;
+    private bool Visible;
+    private string Title = "", Text = "", OkLabel = "OK";
+    private bool Danger;
+
+    public Task<bool> AskAsync(string title, string text, string okLabel = "OK", bool danger = false)
+    {
+        Title = title; Text = text; OkLabel = okLabel; Danger = danger; Visible = true;
+        _tcs = new TaskCompletionSource<bool>();
+        StateHasChanged();
+        return _tcs.Task;
+    }
+
+    private void Close(bool result)
+    {
+        Visible = false;
+        _tcs?.TrySetResult(result);
+    }
+}

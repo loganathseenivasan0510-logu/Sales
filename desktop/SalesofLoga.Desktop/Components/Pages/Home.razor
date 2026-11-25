@@ -1,0 +1,76 @@
+@page "/"
+@inject SalesRepository Repo
+@inject ILogger<Home> Log
+
+<PageTitle>Overview · SalesofLoga</PageTitle>
+<div class="page-head"><h1>Overview</h1></div>
+
+@if (_stats != null)
+{
+    <div class="kpis">
+        <a class="kpi kpi-accent" href="quotation"><span class="kpi-title">Open quotations</span><span class="kpi-value">@_stats.OpenQuotations</span><span class="kpi-sub">@Fmt.Sums(_stats.OpenQuotationValue)</span></a>
+        <a class="kpi" href="quotation"><span class="kpi-title">Closed quotations</span><span class="kpi-value">@_stats.ClosedQuotations</span><span class="kpi-sub">@Fmt.Sums(_stats.ClosedQuotationValue)</span></a>
+        <a class="kpi" href="po-customer"><span class="kpi-title">Customer POs</span><span class="kpi-value">@_stats.CustomerPos</span><span class="kpi-sub">@Fmt.Sums(_stats.CustomerPoValue)</span></a>
+        <a class="kpi" href="po-germany"><span class="kpi-title">German POs</span><span class="kpi-value">@_stats.GermanPos</span><span class="kpi-sub">@Fmt.Sums(_stats.GermanPoValue)</span></a>
+        <a class="kpi" href="stock"><span class="kpi-title">Stock items</span><span class="kpi-value">@_stats.StockItems</span><span class="kpi-sub">@Fmt.Number(_stats.StockQty) pcs in total</span></a>
+        <a class="kpi @(_stats.LowStock.Count > 0 ? "kpi-warn" : null)" href="stock"><span class="kpi-title">Low stock</span><span class="kpi-value">@_stats.LowStock.Count</span><span class="kpi-sub">≤ @_md.LowStockThreshold pcs</span></a>
+    </div>
+
+    <div class="grid-2 dash-grid">
+        <div class="card">
+            <div class="card-head"><h2>Recent activity</h2></div>
+            @if (_audit.Count == 0)
+            {
+                <p class="muted">No activity yet.</p>
+            }
+            else
+            {
+                <ul class="activity">
+                    @foreach (var a in _audit)
+                    {
+                        <li><span class="act-main"><strong>@a.UserName</strong> @Verb(a.Action) @a.Label</span><time class="muted">@Fmt.DateTime(a.Ts)</time></li>
+                    }
+                </ul>
+            }
+        </div>
+        <div class="card">
+            <div class="card-head"><h2>Low stock</h2></div>
+            @if (_stats.LowStock.Count == 0)
+            {
+                <p class="muted">All stock items are above the threshold.</p>
+            }
+            else
+            {
+                <ul class="activity">
+                    @foreach (var s in _stats.LowStock)
+                    {
+                        <li><span class="act-main"><strong>@s.PartId</strong> @s.Description</span><span class="low">@Fmt.Number(s.Qty) pcs</span></li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private DashboardStats? _stats;
+    private List<AuditEntry> _audit = new();
+    private MasterData _md = new();
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            _md = Repo.GetMaster();
+            _stats = Repo.Stats(_md);
+            _audit = Repo.RecentAudit(12);
+        }
+        catch (Exception ex) { Log.LogError(ex, "Dashboard failed"); }
+    }
+
+    private static string Verb(string a) => a switch
+    {
+        "create" => "created", "update" => "changed", "delete" => "deleted", "import" => "imported", "settings" => "changed",
+        "security-check" => "ran", "backup-download" => "downloaded", _ => a
+    };
+}

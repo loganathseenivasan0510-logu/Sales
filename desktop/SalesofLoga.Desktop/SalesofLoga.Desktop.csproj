@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>SalesofLoga</AssemblyName>
+    <RootNamespace>SalesofLoga.Desktop</RootNamespace>
+    <Version>2.0.0</Version>
+    <Product>SalesofLoga – Sales Dashboard CT India</Product>
+    <Company>centrotherm international AG</Company>
+    <Copyright>centrotherm international AG</Copyright>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <!-- Keine NuGet-Abhängigkeiten außer dem .NET-Framework selbst:
+         SQLite über das in Windows enthaltene winsqlite3.dll (P/Invoke), eigenes Datei-Logging. -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <!-- Windows-Release: eine einzelne, selbst enthaltene EXE (kein installiertes .NET nötig) -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+    <OutputType>WinExe</OutputType>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Web-Assets (wwwroot, blazor.web.js, Endpoint-Manifest) als Zip in die EXE einbetten.
+       Das Zip erzeugt publish.ps1 in einem ersten Publish-Durchlauf. -->
+  <ItemGroup Condition="'$(EmbedWebAssets)' == 'true'">
+    <EmbeddedResource Include="$(MSBuildProjectDirectory)\obj\webassets\webassets.zip" LogicalName="webassets.zip" />
+  </ItemGroup>
+
+  <!-- Nur für Offline-Compile-Checks ohne NuGet (blazor.web.js fehlt dann zur Laufzeit) -->
+  <ItemGroup Condition="'$(OfflineBuild)' == 'true'">
+    <KnownAspNetCorePack Remove="Microsoft.AspNetCore.App.Internal.Assets" />
+  </ItemGroup>
+
+</Project>

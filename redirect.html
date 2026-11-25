@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'">
+  <title>Signing in – Sales Dashboard</title>
+</head>
+<body>
+  <p>Signing in…</p>
+  <!--
+    MSAL v5 Redirect-Bridge: empfängt die Antwort von Entra ID und reicht sie an die App weiter.
+    Muss als Redirect-URI (Typ SPA) registriert sein und darf NICHT mit COOP-Header ausgeliefert werden.
+    Wird bewusst lokal eingebunden (kein CDN) – siehe README.
+  -->
+  <script src="vendor/msal-redirect-bridge.min.js"></script>
+  <script src="js/redirect.js"></script>
+</body>
+</html>

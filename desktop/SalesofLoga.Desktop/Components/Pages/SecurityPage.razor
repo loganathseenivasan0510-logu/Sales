@@ -1,0 +1,120 @@
+@page "/security"
+@inject SecurityCheckService Checks
+@inject AppRuntime Rt
+@inject ToastService Toasts
+@inject ILogger<SecurityPage> Log
+
+<PageTitle>Security Check · SalesofLoga</PageTitle>
+<div class="page-head">
+    <h1>Security Check</h1>
+    <p class="muted">Runs 26 automated checks against this running app and a temporary sandbox database (OWASP Top 10). Productive data is not changed.</p>
+</div>
+
+<div class="card sec-run-card">
+    <div class="sec-run">
+        <div>
+            <h2>Run checks</h2>
+            @if (_isAdmin)
+            {
+                <p class="muted">Takes a few seconds. Every run is written to the audit log and saved as an HTML report in <code>@Path.Combine(Rt.Paths.DataDir, "reports")</code>.</p>
+            }
+            else
+            {
+                <p class="muted">Only administrators can run the security check. Ask IT to add your account (@Rt.User.Account) under Settings → Administrators.</p>
+            }
+        </div>
+        @if (_isAdmin)
+        {
+            <button type="button" class="btn btn-primary btn-admin" id="run-security" @onclick="RunAsync" disabled="@_running">
+                <span aria-hidden="true">⛨</span> @(_running ? "Checking…" : "Run security check")
+                <span class="admin-tag">Admin</span>
+            </button>
+        }
+    </div>
+</div>
+
+@if (_run != null)
+{
+    <div class="kpis sec-kpis" id="sec-summary">
+        <div class="kpi @(_run.Failed > 0 ? "kpi-fail" : _run.Warnings > 0 ? "kpi-warnbg" : "kpi-ok")">
+            <span class="kpi-title">Result</span>
+            <span class="kpi-value sec-verdict">@(_run.Failed > 0 ? "FAILED" : _run.Warnings > 0 ? "PASSED*" : "PASSED")</span>
+            <span class="kpi-sub">@Fmt.DateTime(_run.Started.UtcDateTime.ToString("O")) · @_run.RunBy</span>
+        </div>
+        <div class="kpi"><span class="kpi-title">Passed</span><span class="kpi-value" id="sec-passed">@_run.Passed</span><span class="kpi-sub">of @_run.Results.Count checks</span></div>
+        <div class="kpi"><span class="kpi-title">Warnings</span><span class="kpi-value" id="sec-warnings">@_run.Warnings</span><span class="kpi-sub">recommendations</span></div>
+        <div class="kpi @(_run.Failed > 0 ? "kpi-warn" : null)"><span class="kpi-title">Failed</span><span class="kpi-value" id="sec-failed">@_run.Failed</span><span class="kpi-sub">must be fixed</span></div>
+    </div>
+
+    <div class="card results-card">
+        <div class="card-head">
+            <h2>Results</h2>
+            <div class="actions-inline">
+                <a class="btn btn-small" href="security/report/@_run.Id" target="_blank" rel="noopener">Open report</a>
+                <a class="btn btn-small" href="security/report/@(_run.Id)?download=1" download>Download HTML</a>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table class="table sec-table" id="sec-table">
+                <thead><tr><th>ID</th><th>OWASP</th><th>Check</th><th>Expected</th><th>Actual</th><th>Result</th></tr></thead>
+                <tbody>
+                    @foreach (var r in _run.Results)
+                    {
+                        <tr>
+                            <td><code>@r.Id</code></td>
+                            <td class="muted nowrap">@r.Category</td>
+                            <td>@r.Title</td>
+                            <td class="muted">@r.Expected</td>
+                            <td class="wrap"><code>@r.Actual</code></td>
+                            <td><span class="pill pill-sec-@r.Status.ToString().ToLowerInvariant()">@r.Status.ToString().ToUpperInvariant()</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (Checks.History.Count > 1)
+{
+    <div class="card results-card">
+        <div class="card-head"><h2>Earlier runs (this session)</h2></div>
+        <ul class="activity">
+            @foreach (var h in Checks.History.Skip(1))
+            {
+                <li><span class="act-main"><a href="security/report/@h.Id" target="_blank" rel="noopener">@h.Started.ToString("yyyy-MM-dd HH:mm:ss")</a> · @h.RunBy</span>
+                    <span class="muted">@h.Passed passed · @h.Warnings warn · @h.Failed failed</span></li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    private SecurityRun? _run;
+    private bool _running;
+    private bool _isAdmin;
+
+    protected override void OnInitialized()
+    {
+        _isAdmin = Rt.IsAdmin;
+        _run = Checks.History.FirstOrDefault();
+    }
+
+    private async Task RunAsync()
+    {
+        if (!Rt.IsAdmin) { Toasts.Show("Only administrators can run the security check.", "error"); return; } // serverseitig erneut geprüft
+        _running = true;
+        try
+        {
+            await Task.Yield();
+            _run = await Task.Run(() => Checks.RunAsync(Rt.User));
+            Toasts.Show($"Security check finished: {_run.Passed} passed, {_run.Warnings} warnings, {_run.Failed} failed.", _run.Failed > 0 ? "error" : "success");
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Security check failed to run");
+            Toasts.Show($"Security check could not run: {ex.Message}", "error");
+        }
+        finally { _running = false; }
+    }
+}

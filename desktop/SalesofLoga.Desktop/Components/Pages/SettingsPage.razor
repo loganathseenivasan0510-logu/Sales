@@ -1,0 +1,209 @@
+@page "/settings"
+@using System.Diagnostics
+@inject SalesRepository Repo
+@inject AppRuntime Rt
+@inject ToastService Toasts
+@inject IHostApplicationLifetime Life
+@inject ILogger<SettingsPage> Log
+
+<PageTitle>Settings · SalesofLoga</PageTitle>
+<div class="page-head"><h1>Settings</h1></div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-head"><h2>User</h2></div>
+        <dl class="kv">
+            <dt>Name</dt><dd>@Rt.User.Name</dd>
+            <dt>Windows account</dt><dd><code>@Rt.User.Account</code></dd>
+            @if (Rt.User.Upn.Length > 0)
+            {
+                <dt>UPN</dt><dd><code>@Rt.User.Upn</code></dd>
+            }
+            <dt>Role</dt><dd>@(_isAdmin ? (_md.Admins.Count == 0 ? "Administrator (no administrators configured yet – single-user mode)" : "Administrator") : "User")</dd>
+        </dl>
+        <p class="muted small">The identity comes from the Windows sign-in and is stored with every record and in the audit log.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-head"><h2>Data</h2></div>
+        <dl class="kv">
+            <dt>Database</dt><dd><code>@Rt.Paths.DbPath</code></dd>
+            <dt>Size</dt><dd>@Fmt.Bytes(DbSize())</dd>
+            <dt>Records</dt><dd>@Repo.CountRecords(false) active · @(Repo.CountRecords(true) - Repo.CountRecords(false)) deleted (kept)</dd>
+            <dt>Last backups</dt>
+            <dd>
+                @foreach (var b in Backups())
+                {
+                    <div class="small">@b.Name · @Fmt.Bytes(b.Length)</div>
+                }
+            </dd>
+        </dl>
+        <div class="actions actions-left">
+            <button type="button" class="btn" id="backup-now" @onclick="BackupNow">Backup now</button>
+            <a class="btn" href="backup" download>Download backup (.db)</a>
+            @if (OperatingSystem.IsWindows())
+            {
+                <button type="button" class="btn" @onclick="() => OpenFolder(Rt.Paths.DataDir)">Open data folder</button>
+            }
+        </div>
+        <p class="muted small">The .db file is a standard SQLite database (attachments included as BLOBs). It can be opened with DB Browser for SQLite or imported into SQL Server/PostgreSQL later. Use the <code>v_*</code> views for readable data.</p>
+    </div>
+</div>
+
+@if (_isAdmin)
+{
+    <div class="grid-2 section-gap">
+        <form class="card" @onsubmit="SaveMaster" id="master-form">
+            <div class="card-head"><h2>Master data</h2><span class="admin-tag">Admin</span></div>
+            <div class="field field-top"><label for="md-customers">Customers<br /><span class="muted small">one per line</span></label><textarea id="md-customers" rows="7" @bind="_customers"></textarea></div>
+            <div class="field field-top"><label for="md-admins">Administrators<br /><span class="muted small">DOMAIN\user or UPN, one per line</span></label><textarea id="md-admins" rows="3" @bind="_admins" placeholder="@Rt.User.Account"></textarea></div>
+            <div class="field"><label for="md-low">Low stock threshold</label><input id="md-low" type="text" inputmode="numeric" @bind="_low" /></div>
+            <div class="field">
+                <label for="md-cur">Default currency</label>
+                <select id="md-cur" @bind="_md.DefaultCurrency">@foreach (var c in _md.Currencies){<option value="@c">@c</option>}</select>
+            </div>
+            <div class="actions"><button type="submit" class="btn btn-primary">Save master data</button></div>
+        </form>
+
+        <form class="card" @onsubmit="ImportAsync" id="import-form">
+            <div class="card-head"><h2>Import from the HTML version</h2><span class="admin-tag">Admin</span></div>
+            <p class="muted small">Folder that contains <code>salesofloga-data.json</code> and the <code>attachments</code> folder (the “Local folder” storage of the web version). Existing records are skipped; every attachment passes the file signature check.</p>
+            <div class="field"><label for="import-path">Folder</label><input id="import-path" type="text" @bind="_importPath" placeholder="C:\Users\…\SalesData" /></div>
+            <div class="actions"><button type="submit" class="btn btn-primary" disabled="@_importing">@(_importing ? "Importing…" : "Import")</button></div>
+            @if (_importResult != null)
+            {
+                <div class="import-result" id="import-result">
+                    <strong>@_importResult.Records records imported</strong>, @_importResult.Skipped skipped, @_importResult.Attachments attachments, @_importResult.RejectedAttachments rejected.
+                    @foreach (var m in _importResult.Messages.Take(10))
+                    {
+                        <div class="small muted">@m</div>
+                    }
+                </div>
+            }
+        </form>
+    </div>
+}
+
+<div class="card results-card">
+    <div class="card-head">
+        <h2>Log (today)</h2>
+        <div class="actions-inline">
+            <button type="button" class="btn btn-small" @onclick="RefreshLog">Refresh</button>
+            @if (OperatingSystem.IsWindows())
+            {
+                <button type="button" class="btn btn-small" @onclick="() => OpenFolder(Rt.Paths.LogDir)">Open log folder</button>
+            }
+        </div>
+    </div>
+    <pre class="log" id="log-view">@string.Join("\n", _log)</pre>
+    <p class="muted small"><code>@Rt.Logs.CurrentFile</code></p>
+</div>
+
+<div class="card results-card">
+    <div class="card-head"><h2>About</h2></div>
+    <dl class="kv">
+        <dt>Version</dt><dd>SalesofLoga @Rt.Version · .NET @Environment.Version · SQLite @SalesofLoga.Desktop.Infrastructure.SqliteConnection.LibraryVersion</dd>
+        <dt>Running since</dt><dd>@Rt.StartedAt.ToString("yyyy-MM-dd HH:mm") · http://127.0.0.1:@Rt.Port (local only)</dd>
+    </dl>
+    <div class="actions actions-left">
+        <button type="button" class="btn btn-ghost-danger" id="quit-app" @onclick="QuitAsync">Quit SalesofLoga</button>
+    </div>
+</div>
+
+<ConfirmDialog @ref="_confirm" />
+
+@code {
+    private MasterData _md = new();
+    private bool _isAdmin;
+    private string _customers = "", _admins = "", _low = "5", _importPath = "";
+    private bool _importing;
+    private ImportResult? _importResult;
+    private IReadOnlyList<string> _log = Array.Empty<string>();
+    private ConfirmDialog _confirm = default!;
+
+    protected override void OnInitialized()
+    {
+        _md = Repo.GetMaster();
+        _isAdmin = Repo.IsAdmin(Rt.User, _md);
+        _customers = string.Join("\n", _md.Customers);
+        _admins = string.Join("\n", _md.Admins);
+        _low = _md.LowStockThreshold.ToString(CultureInfo.InvariantCulture);
+        RefreshLog();
+    }
+
+    private void RefreshLog() => _log = Rt.Logs.Tail(120);
+    private long DbSize() => File.Exists(Rt.Paths.DbPath) ? new FileInfo(Rt.Paths.DbPath).Length : 0;
+    private IEnumerable<FileInfo> Backups() => Directory.GetFiles(Rt.Paths.BackupDir, "*.db").Select(f => new FileInfo(f)).OrderByDescending(f => f.LastWriteTime).Take(5);
+
+    private static List<string> Lines(string s) => s.Split('\n').Select(x => x.Trim()).Where(x => x.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+    private void SaveMaster()
+    {
+        if (!Repo.IsAdmin(Rt.User, Repo.GetMaster())) { Toasts.Show("Only administrators can change master data.", "error"); return; }
+        var customers = Lines(_customers);
+        if (customers.Count == 0) { Toasts.Show("At least one customer is required.", "error"); return; }
+        if (customers.Any(c => c.Length > 80 || c.Any(char.IsControl))) { Toasts.Show("Customer names: max. 80 characters, no control characters.", "error"); return; }
+        if (!int.TryParse(_low, NumberStyles.None, CultureInfo.InvariantCulture, out var low) || low > 1_000_000) { Toasts.Show("Low stock threshold must be a whole number.", "error"); return; }
+        var admins = Lines(_admins);
+        if (admins.Count > 0 && !admins.Any(a => a.Equals(Rt.User.Account, StringComparison.OrdinalIgnoreCase) || a.Equals(Rt.User.Upn, StringComparison.OrdinalIgnoreCase)))
+        {
+            Toasts.Show($"Add your own account ({Rt.User.Account}) to the administrators – otherwise you lock yourself out.", "error");
+            return;
+        }
+        _md.Customers = customers;
+        _md.Admins = admins;
+        _md.LowStockThreshold = low;
+        Repo.SaveMaster(_md, Rt.User);
+        _isAdmin = Repo.IsAdmin(Rt.User, _md);
+        Toasts.Show("Master data saved.", "success");
+    }
+
+    private async Task ImportAsync()
+    {
+        if (_importing || !Repo.IsAdmin(Rt.User, Repo.GetMaster())) return;
+        if (string.IsNullOrWhiteSpace(_importPath)) { Toasts.Show("Enter the folder path.", "error"); return; }
+        _importing = true;
+        try
+        {
+            _importResult = await Task.Run(() => Repo.ImportWebJsonAsync(_importPath.Trim().Trim('"'), Rt.User));
+            Toasts.Show($"{_importResult.Records} records imported.", "success");
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Import from {Path} failed", _importPath);
+            Toasts.Show($"Import failed: {ex.Message}", "error");
+        }
+        finally { _importing = false; RefreshLog(); }
+    }
+
+    private void BackupNow()
+    {
+        try
+        {
+            var target = Path.Combine(Rt.Paths.BackupDir, $"manual-{DateTime.Now:yyyy-MM-dd-HHmmss}.db");
+            Repo.BackupTo(target);
+            Repo.Audit(Rt.User, "backup", $"Manual backup {Path.GetFileName(target)}");
+            Log.LogInformation("{User} created manual backup {File}", Rt.User.Account, target);
+            Toasts.Show($"Backup created: {Path.GetFileName(target)}", "success");
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Manual backup failed");
+            Toasts.Show($"Backup failed: {ex.Message}", "error");
+        }
+    }
+
+    private void OpenFolder(string path)
+    {
+        try { Process.Start(new ProcessStartInfo("explorer.exe", $"\"{path}\"") { UseShellExecute = true }); }
+        catch (Exception ex) { Log.LogWarning(ex, "Explorer could not be opened"); }
+    }
+
+    private async Task QuitAsync()
+    {
+        if (!await _confirm.AskAsync("Quit SalesofLoga?", "The local server stops and this window can be closed. All data is already saved.", "Quit")) return;
+        Log.LogInformation("{User} quit the app", Rt.User.Account);
+        Toasts.Show("SalesofLoga is stopping – you can close this window.", "info");
+        _ = Task.Delay(800).ContinueWith(_ => Life.StopApplication());
+    }
+}
