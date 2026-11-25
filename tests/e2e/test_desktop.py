@@ -45,6 +45,8 @@ try:
         page = ctx.new_page()
         page.on("console", lambda m: console_errors.append(m.text) if m.type == "error" else None)
         page.on("pageerror", lambda e: console_errors.append(str(e)))
+        page.on("requestfailed", lambda r: console_errors.append(f"request failed: {r.url} {r.failure}"))
+        page.on("response", lambda r: console_errors.append(f"HTTP {r.status} {r.url}") if r.status >= 400 else None)
 
         def ready():
             # Kein wait_for_function: das nutzt eval und wird (korrekt) von der CSP der App blockiert
@@ -53,7 +55,9 @@ try:
                     break
                 page.wait_for_timeout(250)
             else:
-                raise TimeoutError("Blazor did not start")
+                page.screenshot(path=str(shots / "fail-blazor-start.png"), full_page=True)
+                (out / "fail-page.html").write_text(page.content(), encoding="utf-8")
+                raise TimeoutError("Blazor did not start; console: " + " | ".join(console_errors[-8:]))
             page.wait_for_timeout(800)  # Circuit aufbauen
 
         def go(path):
@@ -230,6 +234,7 @@ try:
         browser.close()
 except Exception:
     traceback.print_exc()
+    print("Browser console / network errors:\n  " + "\n  ".join(console_errors[-30:]))
     check("UI-00", "Test run completed", False, traceback.format_exc(limit=2))
 finally:
     proc.terminate()
@@ -237,7 +242,10 @@ finally:
     except Exception: proc.kill()
     logs = data / "app" / "logs"
     if logs.exists():
-        for f in logs.glob("*.log"): shutil.copy(f, out / f"app-{f.name}")
+        for f in logs.glob("*.log"):
+            shutil.copy(f, out / f"app-{f.name}")
+            if any(not r["ok"] for r in results):
+                print(f"--- {f.name} (last 40 lines) ---"); print("\n".join(f.read_text(encoding="utf-8").splitlines()[-40:]))
 
 passed = sum(r["ok"] for r in results); failed = len(results) - passed
 (out / "ui-tests.json").write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")

@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # nur für den Entwurfs-Release (nicht öffentlich)
 
 jobs:
   windows:
@@ -59,7 +59,7 @@ jobs:
         run: python tests/e2e/test_desktop.py --exe publish/SalesofLoga.exe --out artifacts
 
       - name: Upload EXE
-        if: success()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: SalesofLoga-win-x64
@@ -76,3 +76,16 @@ jobs:
           name: test-reports
           path: artifacts/
           retention-days: 30
+
+      - name: Draft release with EXE and reports (not public)
+        if: always() && github.event_name != 'pull_request'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          Compress-Archive -Path artifacts/* -DestinationPath test-reports.zip -Force
+          $assets = @('test-reports.zip')
+          if (Test-Path publish/SalesofLoga.exe) { $assets += 'publish/SalesofLoga.exe' }
+          $tag = "desktop-build-${{ github.run_number }}"
+          $notes = "Automated build ${{ github.sha }} – job status: ${{ job.status }}. Draft = only visible to repository admins."
+          gh release create $tag @assets --draft --prerelease --target ${{ github.sha }} --title "SalesofLoga Desktop build ${{ github.run_number }}" --notes $notes
